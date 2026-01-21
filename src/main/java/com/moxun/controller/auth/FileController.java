@@ -1,4 +1,4 @@
-package com.moxun.controller;
+package com.moxun.controller.auth;
 
 
 import lombok.extern.slf4j.Slf4j;

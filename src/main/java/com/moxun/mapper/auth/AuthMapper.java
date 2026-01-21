@@ -1,4 +1,4 @@
-package com.moxun.mapper;
+package com.moxun.mapper.auth;
 
 
 import com.moxun.Pojo.Entity.User;

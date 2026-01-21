@@ -1,12 +1,12 @@
-package com.moxun.service.impl;
+package com.moxun.service.auth.impl;
 
 import com.moxun.Pojo.Dto.LoginDTO;
 import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.LoginResultVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
-import com.moxun.mapper.AuthMapper;
-import com.moxun.service.AuthService;
+import com.moxun.mapper.auth.AuthMapper;
+import com.moxun.service.auth.AuthService;
 import com.moxun.util.Jwt;
 import com.moxun.util.UserContext;
 import lombok.extern.slf4j.Slf4j;

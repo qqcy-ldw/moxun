@@ -1,4 +1,4 @@
-package com.moxun.service;
+package com.moxun.service.auth;
 
 
 import com.moxun.Pojo.Dto.LoginDTO;

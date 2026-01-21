@@ -1,4 +1,4 @@
-package com.moxun.service;
+package com.moxun.service.auth;
 
 import org.springframework.web.multipart.MultipartFile;
 

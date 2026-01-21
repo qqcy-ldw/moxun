@@ -1,4 +1,4 @@
-package com.moxun.controller;
+package com.moxun.controller.auth;
 
 
 import cn.hutool.captcha.CaptchaUtil;
@@ -8,8 +8,8 @@ import com.moxun.Pojo.Dto.LoginDTO;
 import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Vo.LoginResultVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
-import com.moxun.service.AuthService;
-import com.moxun.service.FileService;
+import com.moxun.service.auth.AuthService;
+import com.moxun.service.auth.FileService;
 import com.moxun.util.IpUtil;
 import com.moxun.util.Result;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 认证控制器
@@ -38,22 +39,24 @@ public class AuthController {
 
     private final static String SESSION_KEY = "captcha";
 
+    //T0D0: 后续使用redis存储验证码
+    private final ConcurrentHashMap map = new ConcurrentHashMap();
+
     /**
      * 用户登录
-     * @param username
-     * @param password
+     * @param loginDTO
      * @return
      */
     @PostMapping("/login")
-    public Result CommonLogin(String username,
-                              String password,
-                              String captcha,
-                              HttpServletRequest request){
-        String header = request.getHeader(SESSION_KEY);
+    public Result CommonLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
+        String username = loginDTO.getUsername();
+        String password = loginDTO.getPassword();
+        String captcha = loginDTO.getCaptcha();
         String ipAddress = IpUtil.getClientIpAddress(request);
-        log.info("用户名{},密码{},验证码{},IP地址{}", username, password, captcha,ipAddress);
-        log.info("验证码：" + header);
-        if (!header.equals(captcha)){
+        log.info("登录用户：" + username);
+        log.info("验证码：" + captcha);
+        //TODO目前只校验了验证码，后续需要完善
+        if (!captcha.equals(map.get(SESSION_KEY))){
             throw new RuntimeException("验证码错误");
         }
         LoginResultVO loginResultVO = authService.CommonLogin(username, password,ipAddress);
@@ -85,6 +88,7 @@ public class AuthController {
         String code = CircleCaptcha.getCode();
         log.info("验证码：" + code);
         CircleCaptcha.write(response.getOutputStream());
+        map.put(SESSION_KEY,code);
         response.setHeader(SESSION_KEY,code);
     }
 

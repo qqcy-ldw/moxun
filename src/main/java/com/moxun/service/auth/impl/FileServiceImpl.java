@@ -1,6 +1,6 @@
-package com.moxun.service.impl;
+package com.moxun.service.auth.impl;
 
-import com.moxun.service.FileService;
+import com.moxun.service.auth.FileService;
 import com.moxun.util.AliOssUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
