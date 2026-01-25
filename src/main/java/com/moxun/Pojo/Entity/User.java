@@ -23,6 +23,11 @@ public class User {
     private String username;
 
     /**
+     * 真实姓名
+     */
+    private String realName;
+
+    /**
      * 密码(加密)
      */
     private String password;

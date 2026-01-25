@@ -24,9 +24,9 @@ public class LoginResultVO {
     private String username;
 
     /**
-     * 显示名称
+     * 真实姓名
      */
-    private String displayName;
+    private String realName;
 
     /**
      * 头像URL

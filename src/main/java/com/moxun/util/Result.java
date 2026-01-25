@@ -114,6 +114,13 @@ public class Result<T> {
     }
 
     /**
+     * 失败结果（自定义状态码、消息和数据）
+     */
+    public static <T> Result<T> error(Integer code, String message, T data) {
+        return new Result<T>(code, message, data);
+    }
+
+    /**
      * 设置请求ID
      */
     public String setRequestId(String requestId) {

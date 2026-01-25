@@ -109,6 +109,16 @@ public enum ResultCode {
      */
     FILE_SIZE_EXCEED(1010, "文件大小超限"),
 
+    /**
+     * 账号已被锁定
+     */
+    ACCOUNT_LOCKED(1011, "账号已被锁定"),
+
+    /**
+     * 账号已被禁用
+     */
+    ACCOUNT_DISABLED(1012, "账号已被禁用"),
+
 
     USER_LOGIN_ERROR(4000, "用户登录失败");
 

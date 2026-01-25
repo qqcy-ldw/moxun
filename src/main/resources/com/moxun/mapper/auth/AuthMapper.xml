@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.auth.AuthMapper">
+
+    <!--
+        【学习笔记】
+        为什么把 SQL 写在 XML 而不是注解？
+        1. 复杂SQL更易维护（格式化、换行）
+        2. 支持动态SQL（if、choose、foreach等）
+        3. 便于调试（可以直接复制SQL到数据库执行）
+        4. 更好的代码分离（Java只定义接口）
+    -->
+
+    <!-- ========================================
+         用户认证相关
+         ======================================== -->
+
+    <!-- 根据用户名查询用户信息（用于登录） -->
+    <select id="CommonLogin" resultType="com.moxun.Pojo.Entity.User">
+        SELECT id, username, real_name, email, phone, password, gender, avatar, 
+               status, last_login_ip, last_login_time, create_time, password_expire_time
+        FROM users 
+        WHERE username = #{username}
+    </select>
+
+    <!-- 用户注册 -->
+    <insert id="CommonRegister" parameterType="com.moxun.Pojo.Entity.User">
+        INSERT INTO users(username, password, email, phone, status, gender, avatar, create_time, update_time)
+        VALUES(#{username}, #{password}, #{email}, #{phone}, #{status}, #{gender}, #{avatar}, 
+               #{createTime}, #{updateTime})
+    </insert>
+
+    <!-- 更新用户状态（用于锁定/解锁账号） -->
+    <update id="setStatus">
+        UPDATE users 
+        SET status = #{status}, 
+            password_expire_time = #{passwordExpireTime}
+        WHERE username = #{username}
+    </update>
+
+    <!-- 更新最后登录信息 -->
+    <update id="modifyUpdateTime">
+        UPDATE users 
+        SET update_time = #{updateTime}, 
+            last_login_ip = #{lastLoginIp},
+            last_login_time = #{lastLoginTime}
+        WHERE username = #{username}
+    </update>
+
+    <!-- 获取用户详细信息 -->
+    <select id="getUserInfo" resultType="com.moxun.Pojo.Vo.UserProfileVO">
+        SELECT id, username, email, phone, gender, avatar, status, 
+               last_login_ip, last_login_time, create_time
+        FROM users 
+        WHERE id = #{id}
+    </select>
+
+    <!-- 修改用户信息（动态更新） -->
+    <update id="modifyUpdateUser">
+        UPDATE users
+        <set>
+            <if test="username != null and username.trim() != ''">
+                username = #{username},
+            </if>
+            <if test="realName != null and realName.trim() != ''">
+                real_name = #{realName},
+            </if>
+            <if test="email != null and email.trim() != ''">
+                email = #{email},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="avatar != null">
+                avatar = #{avatar},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 上传用户头像 -->
+    <update id="uploadUserAvatar">
+        UPDATE users 
+        SET avatar = #{upload} 
+        WHERE username = #{username}
+    </update>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="getByUserName" resultType="com.moxun.Pojo.Entity.User">
+        SELECT id, username, real_name, email, phone, gender, avatar, status, 
+               last_login_ip, last_login_time, create_time
+        FROM users 
+        WHERE username = #{username}
+    </select>
+
+    <!-- ========================================
+         Spring Security 权限查询
+         ======================================== -->
+
+    <!--
+        查询用户的所有权限标识
+        
+        【SQL 解析】
+        1. 从 sys_user_role 查询用户的所有角色
+        2. 通过 sys_role_menu 查询角色拥有的菜单
+        3. 获取菜单的 permission 字段（如：system:user:view）
+        4. 使用 DISTINCT 去重
+        5. 过滤掉空权限和禁用菜单
+        
+        【返回示例】
+        ["system:user:view", "system:user:add", "system:user:edit"]
+    -->
+    <select id="findUserPermissions" resultType="java.lang.String">
+        SELECT DISTINCT m.permission
+        FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON m.id = rm.menu_id
+        INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+          AND m.permission IS NOT NULL
+          AND m.status = 1
+#         ORDER BY m.sort
+    </select>
+
+    <!--
+        查询用户的所有角色
+        
+        【SQL 解析】
+        1. 从 sys_user_role 关联表查询用户拥有的角色
+        2. JOIN sys_role 表获取角色名称
+        3. 角色名必须是 ROLE_XXX 格式（Spring Security 约定）
+        
+        【返回示例】
+        ["ROLE_ADMIN", "ROLE_TEACHER"]
+        
+        【注意】
+        数据库中的 role_name 必须以 ROLE_ 开头！
+        例如：ROLE_ADMIN, ROLE_TEACHER, ROLE_STUDENT
+    -->
+    <select id="findUserRoles" resultType="java.lang.String">
+        SELECT r.role_name
+        FROM sys_role r
+        INNER JOIN sys_user_role ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+</mapper>

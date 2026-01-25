@@ -26,6 +26,11 @@ public class UserProfileVO {
     private String username;
 
     /**
+     * 真实姓名
+     */
+    private String realName;
+
+    /**
      * 邮箱
      */
     private String email;

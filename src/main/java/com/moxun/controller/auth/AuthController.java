@@ -8,6 +8,7 @@ import com.moxun.Pojo.Dto.LoginDTO;
 import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Vo.LoginResultVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
+import com.moxun.exception.BusinessException;
 import com.moxun.service.auth.AuthService;
 import com.moxun.service.auth.FileService;
 import com.moxun.util.IpUtil;
@@ -37,6 +38,8 @@ public class AuthController {
     @Autowired
     private FileService fileService;
 
+
+
     private final static String SESSION_KEY = "captcha";
 
     //T0D0: 后续使用redis存储验证码
@@ -57,7 +60,7 @@ public class AuthController {
         log.info("验证码：" + captcha);
         //TODO目前只校验了验证码，后续需要完善
         if (!captcha.equals(map.get(SESSION_KEY))){
-            throw new RuntimeException("验证码错误");
+            throw new BusinessException("验证码错误");
         }
         LoginResultVO loginResultVO = authService.CommonLogin(username, password,ipAddress);
         log.info("登录结果：" + loginResultVO);

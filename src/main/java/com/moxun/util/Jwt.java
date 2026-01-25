@@ -62,8 +62,6 @@ public class Jwt {
                 .setSigningKey(getSigningKey()) // 用相同密钥验证签名
                 .build()
                 .parseClaimsJws(token);// 解析令牌（自动校验过期时间）
-        log.info("jws:{}",jws);
-        log.info("jws.getBody():{}",jws.getBody());
         return jws.getBody();
     }
 }
