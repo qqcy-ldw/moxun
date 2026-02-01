@@ -119,8 +119,25 @@ public enum ResultCode {
      */
     ACCOUNT_DISABLED(1012, "账号已被禁用"),
 
+    /**
+     * 用户登录失败
+     */
+    USER_LOGIN_ERROR(4000, "用户登录失败"),
 
-    USER_LOGIN_ERROR(4000, "用户登录失败");
+    /**
+     * 数据库操作失败
+     */
+    DATABASE_ERROR(4001, "数据库操作失败"),
+
+    /**
+     * 数据已存在
+     */
+    DATA_EXIST(4002, "数据已存在"),
+
+    /**
+     * 数据不存在
+     */
+    DATA_NOT_FOUND(4003, "数据不存在");
 
 
     private final Integer code;

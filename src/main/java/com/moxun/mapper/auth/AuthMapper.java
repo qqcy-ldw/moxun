@@ -3,8 +3,10 @@ package com.moxun.mapper.auth;
 
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.UserProfileVO;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -105,4 +107,12 @@ public interface AuthMapper {
      * @return 角色列表
      */
     List<String> findUserRoles(Long userId);
+
+    /**
+     * 设置用户角色
+     * @param userId 用户ID
+     * @param roleId 角色ID
+     */
+    @Insert("insert into sys_user_role(user_id, role_id) values(#{userId}, #{roleId})")
+    void setRole(Long userId, Integer roleId);
 }

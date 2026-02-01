@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,8 +39,9 @@ public class AuthController {
     @Autowired
     private FileService fileService;
 
-
-
+    /**
+     * 验证码session key
+     */
     private final static String SESSION_KEY = "captcha";
 
     //T0D0: 后续使用redis存储验证码
@@ -73,6 +75,7 @@ public class AuthController {
      * @param loginDTO
      * @return
      */
+    //TODO 完善注册功能：用户名称
     @PostMapping("/register")
     public Result CommonRegister(@RequestBody LoginDTO loginDTO){
         authService.CommonRegister(loginDTO);
@@ -110,6 +113,7 @@ public class AuthController {
      * 获取当前登录用户信息
      * @return
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me/{id}")
     public Result<UserProfileVO> getUserInfo(@PathVariable Integer id){
         log.info("获取用户信息：" + id);
@@ -123,6 +127,7 @@ public class AuthController {
      * @param UserUpdateDTO
      * @return
      */
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/users/{id}")
     public Result updateUserInfo(@RequestBody UserUpdateDTO UserUpdateDTO){
         log.info("更新用户信息：" + UserUpdateDTO);
@@ -131,6 +136,12 @@ public class AuthController {
     }
 
 
+    /**
+     * 上传用户头像
+     * @param file
+     * @return
+     */
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/upload/user/avatar")
     public Result<String> uploadUserAvatar(@RequestParam("file") MultipartFile file){
         log.info("上传用户头像：" + file.getOriginalFilename());

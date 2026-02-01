@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 作业提交附件VO
  */
@@ -12,7 +14,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubmissionAttachmentVO {
+public class SubmissionAttachmentVO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
 
     /**
      * 附件ID

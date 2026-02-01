@@ -5,10 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.io.Serializable;
+
 /**
  * 用户注册请求DTO
  */
-public class UserRegisterDTO {
+public class UserRegisterDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * 用户名
      */

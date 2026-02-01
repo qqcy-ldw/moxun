@@ -3,12 +3,15 @@ package com.moxun.Pojo.Dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 创建作业请求DTO
  */
-public class AssignmentCreateDTO {
+public class AssignmentCreateDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
 
     /**
      * 作业标题

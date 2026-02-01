@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.admin.AdminUserMapper">
+
+    <select id="listUsers" resultType="com.moxun.Pojo.Vo.UserListVO">
+        SELECT
+        u.username,
+        u.real_name,
+        u.phone,
+        u.email,
+        u.status,
+        sr.role_name,
+        u.create_time,
+        u.update_time
+        FROM users u
+        JOIN sys_role_menu srm ON u.id = srm.menu_id
+        JOIN sys_role sr ON srm.role_id = sr.id
+        <where>
+            <if test="username != null">
+                and username like concat('%', #{username}, '%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+</mapper>

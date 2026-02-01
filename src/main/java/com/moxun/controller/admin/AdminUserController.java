@@ -1,14 +1,21 @@
 package com.moxun.controller.admin;
 
 import com.moxun.Pojo.Entity.User;
+import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.Pojo.Vo.UserListVO;
+import com.moxun.Pojo.Vo.UserProfileVO;
+import com.moxun.service.admin.AdminUserService;
 import com.moxun.util.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 管理员用户管理接口
@@ -26,37 +33,30 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/admin/users")
 public class AdminUserController {
+
+    @Autowired
+    private AdminUserService userService;
     
     /**
      * 查询用户列表
      * 
      * 权限：ADMIN 角色 或 system:user:view 权限
-     * 
      * 测试方法：
      * 1. 使用 郑静（ROLE_ADMIN）登录，应该能访问
      * 2. 使用 张明（ROLE_STUDENT）登录，应该返回 403
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:view')")
     @GetMapping
-    public Result<String> listUsers(
+    public Result<PageResult> listUsers(
             @RequestParam(required = false) String username,
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer pageSize
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(defaultValue = "1") Integer status
     ) {
-        // 获取当前登录用户信息
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUser = authentication.getName();
+
+        PageResult users = userService.listUsers(username, page, pageSize, status);
         
-        log.info("【权限控制测试】用户 {} 正在查询用户列表 - 关键字: {}, 页码: {}", 
-                 currentUser, username, page);
-        
-        // 打印用户权限
-        log.info("用户权限: {}", authentication.getAuthorities());
-        
-        // TODO: 实现查询逻辑
-        // List<User> users = userService.listUsers(username, page, pageSize);
-        
-        return Result.success("查询成功！当前用户：" + currentUser + "，拥有权限：" + authentication.getAuthorities());
+        return Result.success(users);
     }
     
     /**
@@ -68,6 +68,7 @@ public class AdminUserController {
     @PostMapping
     public Result<String> addUser(@RequestBody User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("【权限控制测试】Authentication:{}", authentication.toString());
         String currentUser = authentication.getName();
         
         log.info("【权限控制测试】用户 {} 正在新增用户 - 用户名: {}", currentUser, user.getUsername());

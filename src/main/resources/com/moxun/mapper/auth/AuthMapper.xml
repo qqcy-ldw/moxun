@@ -25,9 +25,9 @@
     </select>
 
     <!-- 用户注册 -->
-    <insert id="CommonRegister" parameterType="com.moxun.Pojo.Entity.User">
-        INSERT INTO users(username, password, email, phone, status, gender, avatar, create_time, update_time)
-        VALUES(#{username}, #{password}, #{email}, #{phone}, #{status}, #{gender}, #{avatar}, 
+    <insert id="CommonRegister" parameterType="com.moxun.Pojo.Entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users(username, real_name, password, email, phone, status, gender, create_time, update_time)
+        VALUES(#{username},#{realName}, #{password}, #{email}, #{phone}, #{status}, #{gender},
                #{createTime}, #{updateTime})
     </insert>
 

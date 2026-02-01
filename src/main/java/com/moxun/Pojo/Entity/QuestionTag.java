@@ -5,11 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionTag {
+public class QuestionTag implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     /**
      * 标签ID
      */

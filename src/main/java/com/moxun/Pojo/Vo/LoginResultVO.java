@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 登录结果VO
  */
@@ -12,7 +14,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResultVO {
+public class LoginResultVO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * 用户ID
      */

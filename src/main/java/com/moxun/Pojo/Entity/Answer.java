@@ -5,13 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Answer {
+public class Answer implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     /**
      * 回答ID
      */

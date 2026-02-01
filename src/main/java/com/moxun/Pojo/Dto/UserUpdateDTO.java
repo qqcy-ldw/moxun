@@ -3,10 +3,14 @@ package com.moxun.Pojo.Dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
+import java.io.Serializable;
+
 /**
  * 用户资料更新请求DTO
  */
-public class UserUpdateDTO {
+public class UserUpdateDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * 昵称/用户名
      */

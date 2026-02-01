@@ -17,7 +17,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 @Component
 public class SecurityService implements UserDetailsService {
@@ -31,7 +33,7 @@ public class SecurityService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 1. 查询用户
         User user = authMapper.CommonLogin(username);
-        if (user == null) {
+        if (Objects.isNull(user)) {
             throw new UsernameNotFoundException("用户不存在: " + username);
         }
 
@@ -40,7 +42,7 @@ public class SecurityService implements UserDetailsService {
         checkAccountStatus(user);
 
         // 3. 获取用户权限（从您的 sys_role_menu 等表查询）
-        List<GrantedAuthority> authorities = getAuthorities((Long)user.getId());
+        List<GrantedAuthority> authorities = getAuthorities(user.getId());
 
         // 4. 返回 UserDetails 对象（Spring Security 的标准用户对象）
         return org.springframework.security.core.userdetails.User

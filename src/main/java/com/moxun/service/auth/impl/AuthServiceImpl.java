@@ -12,6 +12,7 @@ import com.moxun.service.auth.AuthService;
 import com.moxun.util.Jwt;
 import com.moxun.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -114,38 +116,9 @@ public class AuthServiceImpl implements AuthService {
                     .avatar(loginUser.getAvatar())
                     .token(token)
                     .build();
-
         } catch (Exception e) {
-            log.error("登录失败 - 用户: {}, 错误: {}", username, e.getMessage());
-            
-            // 1. 记录失败次数（累加）
-            int failCount = loginFailCount.getOrDefault(username, 0) + 1;
-            loginFailCount.put(username, failCount);
-            log.info("用户[{}]登录失败次数：{}", username, failCount);
-
-            // 2. 失败3次后锁定账号
-            if (failCount >= 3) {
-                log.warn("用户[{}]登录失败次数达到3次，锁定账号10分钟", username);
-                
-                try {
-                    // 获取当前时间10分钟后
-                    User user = new User();
-                    user.setUsername(username);  // 必须设置username，SQL需要知道更新哪个用户
-                    user.setPasswordExpireTime(LocalDateTime.now().plus(10, ChronoUnit.MINUTES));
-                    user.setStatus(2);  // 2表示锁定状态
-                    authMapper.setStatus(user);
-                    
-                    log.info("用户[{}]已锁定，锁定至：{}", username, user.getPasswordExpireTime());
-                } catch (Exception ex) {
-                    log.error("锁定用户[{}]失败：{}", username, ex.getMessage());
-                }
-                
-                // 抛出锁定异常，告知用户账号已锁定
-                throw new BusinessException(ResultCode.ACCOUNT_LOCKED, "登录失败次数过多，账号已锁定10分钟");
-            }
-            
-            // 3. 抛出登录失败异常
-            throw new BusinessException(ResultCode.LOGIN_ERROR, "用户名或密码错误（剩余尝试次数：" + (3 - failCount) + "）");
+            aaa(username, e);
+            throw new BusinessException(ResultCode.USER_LOGIN_ERROR, "用户登录失败");
         }
     }
 
@@ -169,31 +142,41 @@ public class AuthServiceImpl implements AuthService {
     public void CommonRegister(LoginDTO loginDTO) {
         log.info("用户注册请求 - 用户名: {}", loginDTO.getUsername());
 
-        // 1. 检查用户名是否已存在
+        // 检查用户名是否已存在
         User existUser = authMapper.CommonLogin(loginDTO.getUsername());
-        if (existUser != null) {
+        if (!Objects.isNull(existUser)) {
             throw new BusinessException(ResultCode.DATA_EXISTS, "用户名已存在");
         }
 
-        // 2. 创建用户对象
+        // 创建用户对象
         User user = new User();
         BeanUtils.copyProperties(loginDTO, user);
         user.setStatus(1);  // 正常状态
 
-        // 3. 加密密码（使用BCrypt）
-        // encode()会自动添加{bcrypt}前缀
+        // 设置真实姓名
+        if (loginDTO.getRealName() == null || loginDTO.getRealName().isEmpty()) {
+            user.setRealName(loginDTO.getUsername());  // 使用用户名作为默认值
+        } else {
+            user.setRealName(loginDTO.getRealName());
+        }
+
+        // 加密密码（默认使用BCrypt）
         String encodedPassword = passwordEncoder.encode(loginDTO.getPassword());
         user.setPassword(encodedPassword);
 
         log.info("密码加密完成 - 加密后: {}", encodedPassword);
 
-        // 4. 设置时间
+        //  设置时间
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
 
-        // 5. 保存用户
+        // 保存用户
         authMapper.CommonRegister(user);
-        
+
+        // 设置用户角色
+        authMapper.setRole(user.getId(), loginDTO.getRoleId());
+
+
         log.info("用户注册成功 - 用户名: {}", loginDTO.getUsername());
     }
 
@@ -238,5 +221,37 @@ public class AuthServiceImpl implements AuthService {
             log.error("用户头像上传失败: {}", e.getMessage());
             throw new BusinessException(ResultCode.FILE_UPLOAD_ERROR, "头像上传失败");
         }
+    }
+
+    public void aaa(String username, Exception e){
+        log.error("登录失败 - 用户: {}, 错误: {}", username, e.getMessage());
+
+        // 1. 记录失败次数（累加）
+        int failCount = loginFailCount.getOrDefault(username, 0) + 1;
+        loginFailCount.put(username, failCount);
+        log.info("用户[{}]登录失败次数：{}", username, failCount);
+
+        // 2. 失败3次后锁定账号
+        if (failCount >= 3) {
+            log.warn("用户[{}]登录失败次数达到3次，锁定账号10分钟", username);
+            try {
+                // 获取当前时间10分钟后
+                User user = new User();
+                user.setUsername(username);  // 必须设置username，SQL需要知道更新哪个用户
+                user.setPasswordExpireTime(LocalDateTime.now().plus(10, ChronoUnit.MINUTES));
+                user.setStatus(2);  // 2表示锁定状态
+                authMapper.setStatus(user);
+
+                log.info("用户[{}]已锁定，锁定至：{}", username, user.getPasswordExpireTime());
+            } catch (Exception ex) {
+                log.error("锁定用户[{}]失败：{}", username, ex.getMessage());
+            }
+
+            // 抛出锁定异常，告知用户账号已锁定
+            throw new BusinessException(ResultCode.ACCOUNT_LOCKED, "登录失败次数过多，账号已锁定10分钟");
+        }
+
+        // 3. 抛出登录失败异常
+        throw new BusinessException(ResultCode.LOGIN_ERROR, "用户名或密码错误（剩余尝试次数：" + (3 - failCount) + "）");
     }
 }

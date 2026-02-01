@@ -5,11 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SysUserRole {
+public class SysUserRole implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     /**
      * 用户ID（关联users.id）
      */

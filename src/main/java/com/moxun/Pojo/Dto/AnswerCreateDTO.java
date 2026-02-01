@@ -3,10 +3,13 @@ package com.moxun.Pojo.Dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serializable;
+
 /**
  * 创建回答请求DTO
  */
-public class AnswerCreateDTO {
+public class AnswerCreateDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * 问题ID

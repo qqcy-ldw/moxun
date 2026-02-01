@@ -4,12 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * 创建课程请求DTO
  */
-public class CourseCreateDTO {
+public class CourseCreateDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
 
     /**
      * 课程标题

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 课程分类VO
  */
@@ -12,7 +14,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseCategoryVO {
+public class CourseCategoryVO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
 
     /**
      * 分类ID

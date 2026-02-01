@@ -4,6 +4,7 @@ package com.moxun.exception;
 import com.moxun.Enum.ResultCode;
 import com.moxun.util.Result;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -12,20 +13,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.stream.Collectors;
-
-
 /**
  * 全局异常处理器
- * 
- * 【异常处理优先级】
- * 1. 参数校验异常（MethodArgumentNotValidException）
- * 2. 参数绑定异常（BindException）
- * 3. 业务异常（BusinessException）- 返回具体错误信息
- * 4. 404异常（NoResourceFoundException）
- * 5. 系统异常（Exception）- 返回统一500错误
- * 
- * 【重要】所有方法必须是非静态的，否则无法正确返回响应给前端
  */
 @Slf4j
 @RestControllerAdvice
@@ -76,6 +67,29 @@ public class GlobalExceptionHandler {
     public Result<?> handleNoHandlerFoundException(NoResourceFoundException e, HttpServletRequest request) {
         log.warn("接口不存在: {}, URL: {}", e.getMessage(), request.getRequestURL());
         return Result.error(ResultCode.NOT_FOUND);
+    }
+
+    /**
+     * 处理 Spring Security 权限不足异常
+     * 
+     * 【重要说明】
+     * @PreAuthorize 抛出的 AccessDeniedException 是在方法执行时通过 AOP 抛出的，
+     * 不会经过 Spring Security 的过滤器链，所以不会被 accessDeniedHandler 处理。
+     * 因此，@PreAuthorize 的异常必须在这里处理。
+     * 
+     * 【异常处理流程】
+     * 1. URL 级别权限控制（authorizeHttpRequests）→ accessDeniedHandler 处理
+     * 2. 方法级别权限控制（@PreAuthorize）→ GlobalExceptionHandler 处理（这里）
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public Result<?> handleAccessDeniedException(
+            AccessDeniedException e,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        log.warn("权限不足访问（方法级权限控制）: {}, URL: {}", e.getMessage(), request.getRequestURL());
+        // 设置 HTTP 状态码为 403，与 accessDeniedHandler 保持一致
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        return Result.error(ResultCode.FORBIDDEN);
     }
 
     /**
