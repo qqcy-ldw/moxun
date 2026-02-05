@@ -60,12 +60,12 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
 
     /**
-     * 白名单：这些路径不需要登录即可访问
+     * 白名单： 不需要认证的URL
      */
     private static final String[] URL_PERMITTED_LIST = {
-            "/auth/api/v1/login",
-            "/auth/api/v1/register",
-            "/auth/api/v1/captcha",
+            "/auth/api/login",
+            "/auth/api/register",
+            "/auth/api/captcha",
             "/auth/api/v1/getLoginIp",
             "/error",
             "/test",

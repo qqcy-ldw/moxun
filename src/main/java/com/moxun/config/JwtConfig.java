@@ -11,5 +11,5 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtConfig {
     private String SECRET_KEY;
-    private long EXPIRATION_TIME = 3600000;
+    private long EXPIRATION_TIME;
 }

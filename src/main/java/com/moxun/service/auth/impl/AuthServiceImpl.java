@@ -20,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -139,6 +140,7 @@ public class AuthServiceImpl implements AuthService {
      * @param loginDTO 注册信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void CommonRegister(LoginDTO loginDTO) {
         log.info("用户注册请求 - 用户名: {}", loginDTO.getUsername());
 
@@ -254,4 +256,5 @@ public class AuthServiceImpl implements AuthService {
         // 3. 抛出登录失败异常
         throw new BusinessException(ResultCode.LOGIN_ERROR, "用户名或密码错误（剩余尝试次数：" + (3 - failCount) + "）");
     }
+
 }

@@ -1,10 +1,13 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Pojo.Dto.LoginDTO;
+import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.Pojo.Vo.UserListVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
 import com.moxun.service.admin.AdminUserService;
+import com.moxun.service.auth.AuthService;
 import com.moxun.util.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +39,9 @@ public class AdminUserController {
 
     @Autowired
     private AdminUserService userService;
+
+    @Autowired
+    private AuthService authService;
     
     /**
      * 查询用户列表
@@ -66,15 +72,14 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:add')")
     @PostMapping
-    public Result<String> addUser(@RequestBody User user) {
+    public Result<String> addUser(@RequestBody LoginDTO loginDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info("【权限控制测试】Authentication:{}", authentication.toString());
         String currentUser = authentication.getName();
         
-        log.info("【权限控制测试】用户 {} 正在新增用户 - 用户名: {}", currentUser, user.getUsername());
-        
-        // TODO: 实现新增逻辑
-        // userService.addUser(user);
+        log.info("【权限控制测试】用户 {} 正在新增用户 - 用户名: {}", currentUser, loginDTO.getUsername());
+
+        authService.CommonRegister(loginDTO);
         
         return Result.success("新增成功！操作人：" + currentUser);
     }
@@ -86,35 +91,33 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:edit')")
     @PutMapping("/{id}")
-    public Result<String> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public Result<String> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = authentication.getName();
         
-        log.info("【权限控制测试】用户 {} 正在编辑用户 - 用户ID: {}", currentUser, id);
-        
-        // TODO: 实现编辑逻辑
-        // userService.updateUser(id, user);
+        log.info("【权限控制测试】用户 {} 正在编辑用户 - 用户姓名: {}", currentUser, userUpdateDTO.getUsername());
+
+        authService.modifyUpdateUser(userUpdateDTO);
         
         return Result.success("编辑成功！操作人：" + currentUser);
     }
     
     /**
-     * 删除用户
+     * 删除用户/批量删除用户
      * 
      * 权限：ADMIN 角色 且 system:user:delete 权限（双重验证）
      * 
      * 注意：这里使用 and 连接，表示必须同时满足两个条件
      */
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('system:user:delete')")
-    @DeleteMapping("/{id}")
-    public Result<String> deleteUser(@PathVariable Long id) {
+    @DeleteMapping()
+    public Result<String> deleteUser(@RequestParam List<Integer> id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = authentication.getName();
         
         log.info("【权限控制测试】用户 {} 正在删除用户 - 用户ID: {}", currentUser, id);
-        
-        // TODO: 实现删除逻辑
-        // userService.deleteUser(id);
+
+        userService.deleteUser(id);
         
         return Result.success("删除成功！操作人：" + currentUser);
     }

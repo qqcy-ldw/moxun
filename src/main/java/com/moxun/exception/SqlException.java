@@ -3,6 +3,7 @@ package com.moxun.exception;
 import com.moxun.Enum.ResultCode;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.FieldError;
@@ -21,6 +22,7 @@ import java.util.Map;
  * 专门处理数据库操作相关的异常
  */
 @Slf4j
+@Order(1)
 @RestControllerAdvice
 public class SqlException {
     /**

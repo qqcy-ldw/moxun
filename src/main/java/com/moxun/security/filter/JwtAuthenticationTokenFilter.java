@@ -50,10 +50,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
      * 白名单：这些路径不需要JWT认证
      */
     private static final List<String> WHITE_LIST = Arrays.asList(
-            "/auth/api/v1/login",
-            "/auth/api/v1/register",
-            "/auth/api/v1/captcha",
-            "/auth/api/v1/getLoginIp",
+            "/auth/api/login",
+            "/auth/api/register",
+            "/auth/api/captcha",
+            "/auth/api/getLoginIp",
             "/error",
             "/test",
             "/password",
@@ -91,6 +91,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             Claims claims = Jwt.validateToken(token);
             String username = (String) claims.get("userName");
             Long userId = Long.valueOf(claims.get("userId").toString());
+
 
             log.info("Token验证成功 - 用户: {}, ID: {}", username, userId);
 

@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @RestController
-@RequestMapping("/auth/api/v1")
+@RequestMapping("/auth/api")
 public class AuthController {
 
     @Autowired

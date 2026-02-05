@@ -2,6 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.moxun.mapper.admin.AdminUserMapper">
+    <delete id="deleteUser">
+        delete from users where id in (
+        <foreach item="item" collection="list" separator="," close=")" open="(" index="index">
+            #{item}
+        </foreach>
+        )
+    </delete>
 
     <select id="listUsers" resultType="com.moxun.Pojo.Vo.UserListVO">
         SELECT
@@ -25,4 +32,17 @@
             </if>
         </where>
     </select>
+
+    <select id="isAdmin" resultType="java.lang.Integer">
+        SELECT
+        sur.user_id
+        FROM sys_role sr
+        join sys_user_role sur on sr.id = sur.role_id
+        WHERE sur.user_id = in (
+        <foreach item="item" collection="list" separator="," close=")" open="(" index="index">
+            #{item}
+        </foreach>
+        )
+    </select>
+
 </mapper>
