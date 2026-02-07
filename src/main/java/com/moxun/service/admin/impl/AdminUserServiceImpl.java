@@ -75,7 +75,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             adminUserMapper.deleteUser(id.get(0));
         }else {
             //批量删除用户
-            adminUserMapper.deleteUser(id);
+            adminUserMapper.deleteUsers(id);
         }
     }
 

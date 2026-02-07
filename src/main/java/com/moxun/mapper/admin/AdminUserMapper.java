@@ -21,5 +21,5 @@ public interface AdminUserMapper {
     @Delete("delete from users where id = #{id}")
     void deleteUser(Integer integer);
 
-    void deleteUser(List<Integer> integer);
+    void deleteUsers(List<Integer> integer);
 }

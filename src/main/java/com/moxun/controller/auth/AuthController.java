@@ -13,6 +13,7 @@ import com.moxun.service.auth.AuthService;
 import com.moxun.service.auth.FileService;
 import com.moxun.util.IpUtil;
 import com.moxun.util.Result;
+import com.moxun.util.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -149,5 +151,25 @@ public class AuthController {
         authService.uploadUserAvatar(upload);
         return Result.success();
     }
+
+    /**
+     * 退出登录
+     * @return 成功/失败
+     */
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Void> logout() {
+        // 获取当前用户ID
+        Map<String, Object> map = UserContext.getCurrentUser();
+        String userName =  map.get("userName").toString();
+        log.info("用户退出登录：{}", userName);
+
+        // 清除ThreadLocal
+        UserContext.clear();
+
+        return Result.success();
+    }
+
+
 
 }
