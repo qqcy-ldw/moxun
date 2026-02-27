@@ -61,7 +61,7 @@ public class AdminUserController {
     ) {
 
         PageResult users = userService.listUsers(username, page, pageSize, status);
-        
+        log.info("users:{}",users);
         return Result.success(users);
     }
     

@@ -4,6 +4,7 @@ package com.moxun.controller.auth;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
 import com.moxun.Enum.Folder;
+import com.moxun.Enum.ResultCode;
 import com.moxun.Pojo.Dto.LoginDTO;
 import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Vo.LoginResultVO;
@@ -55,7 +56,7 @@ public class AuthController {
      * @return
      */
     @PostMapping("/login")
-    public Result CommonLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
+    public Result CommonLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request) throws Exception {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
         String captcha = loginDTO.getCaptcha();
@@ -64,7 +65,7 @@ public class AuthController {
         log.info("验证码：" + captcha);
         //TODO目前只校验了验证码，后续需要完善
         if (!captcha.equals(map.get(SESSION_KEY))){
-            throw new BusinessException("验证码错误");
+            throw new BusinessException(ResultCode.CAPTCHA_ERROR,"验证码错误");
         }
         LoginResultVO loginResultVO = authService.CommonLogin(username, password,ipAddress);
         log.info("登录结果：" + loginResultVO);
@@ -170,6 +171,16 @@ public class AuthController {
         return Result.success();
     }
 
+    /**
+     * 用户注销
+     * @return
+     */
+    @GetMapping("/delUserName")
+    public Result<Void> delUserName(){
+        UserContext.clear();
+        log.info("用户注销");
+        return Result.success();
+    }
 
 
 }

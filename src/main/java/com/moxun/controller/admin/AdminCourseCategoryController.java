@@ -56,7 +56,7 @@ public class AdminCourseCategoryController {
      *
      * @return
      */
-    @GetMapping("/category/add")
+    @PostMapping("/category/add")
     public Result addCategory(@RequestBody CourseCategoryDTO courseCategoryDTO) {
         log.info("添加分类:{}", courseCategoryDTO);
         adminCourseCategoryService.addCategory(courseCategoryDTO);

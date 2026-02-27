@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,8 +48,14 @@ public class AdminCourseCategoryServiceImpl implements AdminCourseCategoryServic
      */
     @Override
     public List<CourseCategoryVO> listChildren(Integer parentId) {
-        List<CourseCategoryVO> courseCategory = adminCourseCategoryMapper.listChildren(parentId);
-        return courseCategory;
+        // 1. 查出当前父节点的直接子节点（顶层）
+        List<CourseCategoryVO> directChildren = adminCourseCategoryMapper.listChildren(parentId);
+        // 2. 递归为每个子节点挂载它们的子节点
+        for (CourseCategoryVO child : directChildren) {
+            List<CourseCategoryVO> grandchildren = listChildren(Math.toIntExact(child.getId())); // 递归调用
+            child.setChildren(grandchildren);
+        }
+        return directChildren;
     }
 
     /**
