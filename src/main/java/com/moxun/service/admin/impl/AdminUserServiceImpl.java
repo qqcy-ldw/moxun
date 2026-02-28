@@ -1,9 +1,7 @@
 package com.moxun.service.admin.impl;
 
-import cn.hutool.core.lang.hash.Hash;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.Pojo.Vo.UserListVO;
 import com.moxun.exception.BusinessException;
@@ -11,17 +9,10 @@ import com.moxun.mapper.admin.AdminUserMapper;
 import com.moxun.service.admin.AdminUserService;
 import com.moxun.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,9 +64,11 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         if (id.size() == 1){
             adminUserMapper.deleteUser(id.get(0));
+            adminUserMapper.deleteRole(id.get(0));
         }else {
             //批量删除用户
             adminUserMapper.deleteUsers(id);
+            adminUserMapper.deleteRoles(id);
         }
     }
 

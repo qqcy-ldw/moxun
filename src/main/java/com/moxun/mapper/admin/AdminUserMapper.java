@@ -22,4 +22,9 @@ public interface AdminUserMapper {
     void deleteUser(Integer integer);
 
     void deleteUsers(List<Integer> integer);
+
+    @Delete("delete from sys_user_role where user_id = #{id}")
+    void deleteRole(Integer integer);
+
+    void deleteRoles(List<Integer> id);
 }

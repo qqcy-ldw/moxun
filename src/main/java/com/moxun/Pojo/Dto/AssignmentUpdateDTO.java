@@ -1,11 +1,14 @@
 package com.moxun.Pojo.Dto;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 更新作业请求DTO
  */
+@Data
 public class AssignmentUpdateDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

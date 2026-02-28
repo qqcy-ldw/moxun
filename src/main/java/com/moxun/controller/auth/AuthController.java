@@ -29,7 +29,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 认证控制器
- * 处理登录、注册等认证相关请求
+ *
+ * 路径前缀：/auth/api
+ * 说明：处理登录、注册、验证码、用户信息等认证相关请求
  */
 @Slf4j
 @RestController
@@ -52,8 +54,11 @@ public class AuthController {
 
     /**
      * 用户登录
-     * @param loginDTO
-     * @return
+     * POST /auth/api/login
+     *
+     * @param loginDTO 登录信息（username, password, captcha）
+     * @param request  HTTP 请求（用于获取 IP）
+     * @return 登录结果（token、用户信息等）
      */
     @PostMapping("/login")
     public Result CommonLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request) throws Exception {
@@ -73,10 +78,11 @@ public class AuthController {
     }
 
     /**
-     *
      * 用户注册
-     * @param loginDTO
-     * @return
+     * POST /auth/api/register
+     *
+     * @param loginDTO 注册信息（username, password 等）
+     * @return 注册结果
      */
     //TODO 完善注册功能：用户名称
     @PostMapping("/register")
@@ -88,8 +94,11 @@ public class AuthController {
 
     /**
      * 生成验证码
-     * @param response
-     * @throws IOException
+     * GET /auth/api/captcha
+     * 验证码会写入响应流，同时存入 session 供登录校验
+     *
+     * @param response HTTP 响应
+     * @throws IOException 写入异常
      */
     @GetMapping("/captcha")
     public void generateCaptcha(HttpServletResponse  response) throws IOException {
@@ -102,7 +111,11 @@ public class AuthController {
     }
 
     /**
-     * 获取登录IP地址
+     * 获取登录 IP 地址
+     * GET /auth/api/getLoginIp
+     *
+     * @param request HTTP 请求
+     * @return 客户端 IP 地址
      */
     @GetMapping("/getLoginIp")
     public String getLoginIp(HttpServletRequest request){
@@ -114,7 +127,11 @@ public class AuthController {
 
     /**
      * 获取当前登录用户信息
-     * @return
+     * GET /auth/api/me/{id}
+     * 需登录
+     *
+     * @param id 用户ID
+     * @return 用户资料信息
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me/{id}")
@@ -127,8 +144,11 @@ public class AuthController {
 
     /**
      * 更新用户信息
-     * @param UserUpdateDTO
-     * @return
+     * PUT /auth/api/users/{id}
+     * 需登录
+     *
+     * @param UserUpdateDTO 用户更新信息
+     * @return 更新结果
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/users/{id}")
@@ -141,8 +161,11 @@ public class AuthController {
 
     /**
      * 上传用户头像
-     * @param file
-     * @return
+     * POST /auth/api/upload/user/avatar
+     * 需登录
+     *
+     * @param file 头像文件
+     * @return 上传结果
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/upload/user/avatar")
@@ -155,7 +178,10 @@ public class AuthController {
 
     /**
      * 退出登录
-     * @return 成功/失败
+     * POST /auth/api/logout
+     * 需登录，清除当前用户上下文
+     *
+     * @return 操作结果
      */
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
@@ -173,7 +199,10 @@ public class AuthController {
 
     /**
      * 用户注销
-     * @return
+     * GET /auth/api/delUserName
+     * 清除用户上下文
+     *
+     * @return 操作结果
      */
     @GetMapping("/delUserName")
     public Result<Void> delUserName(){

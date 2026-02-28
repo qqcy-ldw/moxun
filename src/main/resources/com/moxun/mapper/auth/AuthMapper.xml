@@ -106,14 +106,12 @@
 
     <!--
         查询用户的所有权限标识
-        
         【SQL 解析】
         1. 从 sys_user_role 查询用户的所有角色
         2. 通过 sys_role_menu 查询角色拥有的菜单
         3. 获取菜单的 permission 字段（如：system:user:view）
         4. 使用 DISTINCT 去重
         5. 过滤掉空权限和禁用菜单
-        
         【返回示例】
         ["system:user:view", "system:user:add", "system:user:edit"]
     -->
@@ -130,7 +128,6 @@
 
     <!--
         查询用户的所有角色
-        
         【SQL 解析】
         1. 从 sys_user_role 关联表查询用户拥有的角色
         2. JOIN sys_role 表获取角色名称

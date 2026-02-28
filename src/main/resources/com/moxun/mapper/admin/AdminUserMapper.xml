@@ -10,6 +10,15 @@
         )
     </delete>
 
+    <delete id="deleteRoles">
+        delete from sys_user_role where user_id in (
+        <foreach item="item" collection="list" separator="," close=")" open="(" index="index">
+            #{item}
+        </foreach>
+        )
+        />
+    </delete>
+
     <select id="listUsers" resultType="com.moxun.Pojo.Vo.UserListVO">
         SELECT
         u.username,

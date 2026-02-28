@@ -1,12 +1,14 @@
 package com.moxun.Pojo.Dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.io.Serializable;
 
 /**
  * 学生提交作业请求DTO
  */
+@Data
 public class AssignmentSubmitDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

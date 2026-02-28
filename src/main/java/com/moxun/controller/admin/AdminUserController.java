@@ -114,8 +114,6 @@ public class AdminUserController {
     public Result<String> deleteUser(@RequestParam List<Integer> id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = authentication.getName();
-        
-        log.info("【权限控制测试】用户 {} 正在删除用户 - 用户ID: {}", currentUser, id);
 
         userService.deleteUser(id);
         

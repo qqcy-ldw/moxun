@@ -1,6 +1,7 @@
 package com.moxun.Pojo.Dto;
 
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 /**
  * 更新课程请求DTO
  */
+@Data
 public class CourseUpdateDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

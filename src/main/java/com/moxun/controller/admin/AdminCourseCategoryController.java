@@ -13,7 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+/**
+ * 管理员 - 课程分类管理接口
+ *
+ * 路径前缀：/admin/courseCategories
+ * 权限：system:courseCategory:view 等
+ */
 @Slf4j
 @RequestMapping("/admin/courseCategories")
 @RestController
@@ -23,9 +28,11 @@ public class AdminCourseCategoryController {
     private AdminCourseCategoryService adminCourseCategoryService;
 
     /**
-     * 获取所有分类
+     * 分页获取课程分类列表
+     * GET /admin/courseCategories/list
      *
-     * @return
+     * @param page     页码
+     * @param pageSize 每页条数
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:courseCategory:view')")
     @GetMapping("/list")
@@ -52,9 +59,10 @@ public class AdminCourseCategoryController {
     }
 
     /**
-     * 添加分类
+     * 新增课程分类
+     * POST /admin/courseCategories/category/add
      *
-     * @return
+     * @param courseCategoryDTO 分类信息
      */
     @PostMapping("/category/add")
     public Result addCategory(@RequestBody CourseCategoryDTO courseCategoryDTO) {
@@ -64,9 +72,10 @@ public class AdminCourseCategoryController {
     }
 
     /**
-     * 修改分类
+     * 修改课程分类
+     * POST /admin/courseCategories/category/update
      *
-     * @return
+     * @param courseCategoryDTO 分类信息
      */
     @PostMapping("/category/update")
     public Result updateCategory(@RequestBody CourseCategoryDTO courseCategoryDTO) {
@@ -76,9 +85,10 @@ public class AdminCourseCategoryController {
     }
 
     /**
-     * 删除分类
+     * 删除课程分类
+     * GET /admin/courseCategories/category/delete/{parentId}
      *
-     * @return
+     * @param parentId 分类ID
      */
     @GetMapping("/category/delete/{parentId}")
     public Result deleteCategory(@RequestParam Integer parentId) {

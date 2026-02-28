@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 文件接口
+ *
+ * 路径前缀：/auth/api/v1
+ * 说明：文件上传等接口（当前实现已注释，待接入 OSS 等）
  */
 @Slf4j
 @RestController

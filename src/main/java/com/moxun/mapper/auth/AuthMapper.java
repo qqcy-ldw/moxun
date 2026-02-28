@@ -10,15 +10,7 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
-/**
- * 认证相关的 Mapper 接口
- * 
- * 【学习笔记】
- * 为什么不用 @Select 等注解？
- * - 简单SQL可以用注解（@Select、@Insert等）
- * - 复杂SQL建议用XML（更易维护、支持动态SQL）
- * - 本项目统一使用XML方式，SQL都在 AuthMapper.xml 中
- */
+
 @Mapper
 public interface AuthMapper {
 
@@ -82,10 +74,6 @@ public interface AuthMapper {
      * 
      * 【返回格式】
      * ["system:user:view", "system:user:add", "system:user:edit"]
-     * 
-     * 【SQL位置】
-     * 见 AuthMapper.xml 中的 findUserPermissions
-     * 
      * @param userId 用户ID
      * @return 权限标识列表
      */
@@ -99,10 +87,6 @@ public interface AuthMapper {
      * 
      * 【注意】
      * 角色名必须以 ROLE_ 开头（Spring Security 约定）
-     * 
-     * 【SQL位置】
-     * 见 AuthMapper.xml 中的 findUserRoles
-     * 
      * @param userId 用户ID
      * @return 角色列表
      */

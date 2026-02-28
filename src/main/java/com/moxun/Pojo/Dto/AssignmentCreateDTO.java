@@ -2,6 +2,7 @@ package com.moxun.Pojo.Dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 /**
  * 创建作业请求DTO
  */
+@Data
 public class AssignmentCreateDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
