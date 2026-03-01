@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.admin.AdminChapterMapper">
+
+    <resultMap id="ChapterWithSectionsMap" type="com.moxun.Pojo.Vo.ChapterVO">
+        <!-- 章节表的主键，用于分组 -->
+        <id property="id" column="chapter_id" />
+        <result property="title" column="chapter_title" />
+        <result property="sort" column="chapter_sort" />
+        <result property="createTime" column="chapter_create_time" />
+
+        <!-- 一对多：课时列表 -->
+        <collection property="sections" ofType="com.moxun.Pojo.Vo.SectionVO">
+            <id property="id" column="section_id" />
+            <result property="title" column="section_title" />
+            <result property="videoUrl" column="section_video_url" />
+            <result property="duration" column="section_duration" />
+            <result property="isFree" column="section_is_free" />
+            <result property="sort" column="section_sort" />
+            <result property="createTime" column="section_create_time" />
+            <!-- 如果 SectionVO 还有其他字段，继续添加 -->
+        </collection>
+    </resultMap>
+    <insert id="addChapter">
+        insert into chapters(course_id, title, sort, create_time, update_time)
+        VALUES (#{courseId}, #{title}, #{sort}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateChapter">
+        update chapters
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="listChaptersByCourse" resultMap="ChapterWithSectionsMap">
+        SELECT
+            cs.id AS chapter_id,
+            cs.title AS chapter_title,
+            cs.sort AS chapter_sort,
+            cs.create_time AS chapter_create_time,
+            ss.id AS section_id,
+            ss.title AS section_title,
+            ss.video_url AS section_video_url,
+            ss.duration AS section_duration,
+            ss.is_free AS section_is_free,
+            ss.sort AS section_sort,
+            ss.create_time AS section_create_time
+        FROM chapters cs
+        LEFT JOIN sections ss on cs.course_id = ss.chapter_id
+        WHERE cs.course_id = #{courseId}
+        order by cs.sort, ss.sort
+    </select>
+
+    <select id="isSections" resultType="com.moxun.Pojo.Entity.Section">
+        select ss.id, ss.chapter_id, ss.title, ss.video_url, ss.duration, ss.is_free, ss.sort, ss.create_time, ss.update_time
+        FROM chapters cs
+        LEFT JOIN sections ss on cs.id = ss.chapter_id
+        WHERE cs.course_id = #{courseId}
+    </select>
+</mapper>

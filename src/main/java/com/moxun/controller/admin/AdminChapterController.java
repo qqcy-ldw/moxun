@@ -75,7 +75,7 @@ public class AdminChapterController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PutMapping("/{id}")
-    public Result<String> updateChapter(@PathVariable Long id, @RequestBody ChapterSaveDTO dto) {
+    public Result<String> updateChapter(@Valid @PathVariable Long id, @RequestBody ChapterSaveDTO dto) {
         dto.setId(id);
         adminChapterService.updateChapter(dto);
         return Result.success("编辑成功");

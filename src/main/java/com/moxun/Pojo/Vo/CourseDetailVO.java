@@ -62,6 +62,11 @@ public class CourseDetailVO implements Serializable {
     private Integer duration;
 
     /**
+     * 教师ID
+     */
+    private Integer teacherId;
+
+    /**
      * 学生数量
      */
     private Integer studentCount;

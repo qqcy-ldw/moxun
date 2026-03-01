@@ -35,10 +35,11 @@ public class AdminCommentController {
     @GetMapping
     public Result<PageResult> listComments(
             @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) Integer rating,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        PageResult result = adminCommentService.listComments(courseId, page, pageSize);
+        PageResult result = adminCommentService.listComments(courseId, rating, page, pageSize);
         return Result.success(result);
     }
 

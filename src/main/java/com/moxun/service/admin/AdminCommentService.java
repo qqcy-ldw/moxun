@@ -8,7 +8,7 @@ import com.moxun.Pojo.Vo.PageResult;
  */
 public interface AdminCommentService {
 
-    PageResult listComments(Long courseId, Integer page, Integer pageSize);
+    PageResult listComments(Long courseId,Integer rating, Integer page, Integer pageSize);
 
     CourseComment getCommentById(Long id);
 
