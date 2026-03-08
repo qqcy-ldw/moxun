@@ -3,6 +3,7 @@ package com.moxun.service.admin;
 import com.moxun.Pojo.Dto.ChapterSaveDTO;
 import com.moxun.Pojo.Entity.Chapter;
 import com.moxun.Pojo.Vo.ChapterVO;
+import com.moxun.Pojo.Vo.PageResult;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface AdminChapterService {
     void updateChapter(ChapterSaveDTO dto);
 
     void deleteChapter(Long id);
+
+//    PageResult<Chapter> listChapters();
 }

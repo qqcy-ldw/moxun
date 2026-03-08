@@ -2,9 +2,12 @@ package com.moxun.exception;
 
 import com.moxun.Enum.ResultCode;
 import com.moxun.util.Result;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,65 +35,72 @@ public class SqlException {
      *      Cannot add or update a child row
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public Result<?> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+    public ResponseEntity<Result<?>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         log.error("数据完整性约束异常: {}", e.getMessage(), e);
 
-        // 获取原始SQL异常
         Throwable cause = e.getCause();
         String errorMessage = "数据库操作失败";
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST; // 默认400
 
         if (cause != null) {
             String message = cause.getMessage();
 
             if (message.contains("doesn't have a default value")) {
-                // 提取字段名
                 String fieldName = extractFieldName(message, "doesn't have a default value");
                 errorMessage = String.format("字段'%s'不能为空，请提供该字段的值", fieldName);
+                httpStatus = HttpStatus.BAD_REQUEST;
 
             } else if (message.contains("Duplicate entry")) {
-                // 重复数据
                 String duplicateValue = extractDuplicateValue(message);
                 errorMessage = String.format("数据重复: %s", duplicateValue);
+                httpStatus = HttpStatus.CONFLICT; // 409 更合适
 
             } else if (message.contains("foreign key constraint fails")) {
                 errorMessage = "关联数据不存在，请检查相关数据";
+                httpStatus = HttpStatus.BAD_REQUEST;
 
             } else if (message.contains("Data too long for column")) {
-                // 数据过长
                 String fieldName = extractFieldName(message, "Data too long for column");
                 errorMessage = String.format("字段'%s'数据过长，请缩短输入", fieldName);
+                httpStatus = HttpStatus.BAD_REQUEST;
 
             } else if (message.contains("cannot be null")) {
-                // 不能为null
                 String fieldName = extractFieldName(message, "cannot be null");
                 errorMessage = String.format("字段'%s'不能为空", fieldName);
+                httpStatus = HttpStatus.BAD_REQUEST;
             }
         }
 
-        return Result.error(ResultCode.DATABASE_ERROR.getCode(), errorMessage);
+        Result<?> result = Result.error(ResultCode.DATABASE_ERROR.getCode(), errorMessage);
+        return ResponseEntity.status(httpStatus).body(result);
     }
 
     /**
      * 处理SQL完整性约束异常（主键重复、唯一约束等）
      */
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public Result<?> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException e) {
+    public ResponseEntity<Result<?>> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException e) {
         log.error("SQL完整性约束异常: {}", e.getMessage(), e);
 
         String message = e.getMessage();
         String errorMessage = "数据约束冲突";
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST; // 默认400
 
         if (message.contains("Duplicate entry")) {
             String duplicateValue = extractDuplicateValue(message);
             errorMessage = String.format("数据已存在: %s", duplicateValue);
+            httpStatus = HttpStatus.CONFLICT; // 409 更准确
         } else if (message.contains("foreign key constraint fails")) {
             errorMessage = "关联数据不存在";
+            httpStatus = HttpStatus.BAD_REQUEST;
         } else if (message.contains("cannot be null")) {
             String fieldName = extractFieldName(message, "cannot be null");
             errorMessage = String.format("字段%s不能为空", fieldName);
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
 
-        return Result.error(ResultCode.DATABASE_ERROR.getCode(), errorMessage);
+        Result<?> result = Result.error(ResultCode.DATABASE_ERROR.getCode(), errorMessage);
+        return ResponseEntity.status(httpStatus).body(result);
     }
 
     /**
@@ -135,6 +145,23 @@ public class SqlException {
         return Result.error(ResultCode.DATABASE_ERROR.getCode(), "SQL语法错误，请联系管理员");
     }
 
+
+    /**
+     * 处理参数类型转换异常
+     * 当请求参数类型不匹配时抛出，如字符串 "undefined" 无法转换为 Integer
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Result<?>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e,
+            HttpServletRequest request) {
+        String paramName = e.getName();
+        String paramValue = e.getValue() != null ? e.getValue().toString() : "null";
+        String requiredType = e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "未知";
+        String message = String.format("参数 '%s' 类型错误，期望类型: %s，实际值: '%s'", paramName, requiredType, paramValue);
+        log.error("参数类型转换异常: {}, URL: {}", message, request.getRequestURL());
+        return ResponseEntity.badRequest().body(Result.error(ResultCode.PARAM_ERROR.getCode(), message));
+    }
+
     /**
      * 处理参数验证异常
      */
@@ -154,20 +181,7 @@ public class SqlException {
                 errors
         );
     }
-    /**
-     * 处理参数类型不匹配异常
-     */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public Result<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.error("参数类型不匹配异常: {}", e.getMessage(), e);
 
-        String errorMessage = String.format("参数'%s'类型错误，期望类型: %s",
-                e.getName(),
-                e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "未知"
-        );
-
-        return Result.error(ResultCode.PARAM_ERROR.getCode(), errorMessage);
-    }
 
     // ==================== 工具方法 ====================
 

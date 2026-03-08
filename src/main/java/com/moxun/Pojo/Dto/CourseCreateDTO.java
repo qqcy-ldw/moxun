@@ -34,6 +34,11 @@ public class CourseCreateDTO implements Serializable {
     private String coverImage;
 
     /**
+     * 教师ID
+     */
+    private Integer teacherId;
+
+    /**
      * 价格
      */
     @NotNull(message = "价格不能为空")

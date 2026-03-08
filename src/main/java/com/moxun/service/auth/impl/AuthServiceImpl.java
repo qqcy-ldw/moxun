@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -194,16 +195,41 @@ public class AuthServiceImpl implements AuthService {
      * 修改用户信息
      */
     @Override
-    public void modifyUpdateUser(UserUpdateDTO userUpdateDTO) {
+    public void modifyUpdateUser(UserUpdateDTO userUpdateDTO, Integer id) {
+        User originalUser = authMapper.getById(Long.valueOf(id));
+        if (Objects.isNull(originalUser)) {
+            throw new BusinessException("用户不存在");
+        }
+
         User user = new User();
-        BeanUtils.copyProperties(userUpdateDTO, user);
-        
-        Map<String, Object> currentUser = UserContext.getCurrentUser();
-        user.setId(Long.valueOf(currentUser.get("userId").toString()));
+        user.setId(Long.valueOf(id));
         user.setUpdateTime(LocalDateTime.now());
-        
-        authMapper.modifyUpdateUser(user);
-        log.info("用户信息更新成功 - 用户ID: {}", user.getId());
+
+        String newUsername = userUpdateDTO.getUsername();
+        String oldUsername = originalUser.getUsername();
+        if (StringUtils.hasText(newUsername)) {
+            // 新用户名有值时，校验是否被其他用户占用
+            if (!newUsername.equals(oldUsername)) {
+                // 查询「除当前用户外」是否有其他用户使用该新用户名
+                User existUser = authMapper.getByUserName(newUsername);
+                if (Objects.nonNull(existUser)) {
+                    throw new BusinessException("用户名已存在，无法修改");
+                }
+                // 用户名修改且合法，赋值到更新对象
+                user.setUsername(newUsername);
+            }
+            // 用户名未修改，不赋值（避免更新）
+        }
+
+        user.setRealName(userUpdateDTO.getRealName());
+        user.setPhone(userUpdateDTO.getPhone());
+        user.setEmail(userUpdateDTO.getEmail());
+        int updateCount = authMapper.modifyUpdateUser(user);
+        if (updateCount == 0) {
+            throw new BusinessException("用户修改失败（无数据更新或用户不存在）");
+        }
+
+        log.info("用户信息更新成功 - 用户ID: {}", id);
     }
 
     /**

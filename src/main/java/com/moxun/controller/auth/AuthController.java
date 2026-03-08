@@ -68,7 +68,7 @@ public class AuthController {
         String ipAddress = IpUtil.getClientIpAddress(request);
         log.info("登录用户：" + username);
         log.info("验证码：" + captcha);
-        //TODO目前只校验了验证码，后续需要完善
+        //TODO 目前只校验了验证码，后续需要完善
         if (!captcha.equals(map.get(SESSION_KEY))){
             throw new BusinessException(ResultCode.CAPTCHA_ERROR,"验证码错误");
         }
@@ -152,9 +152,9 @@ public class AuthController {
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/users/{id}")
-    public Result updateUserInfo(@RequestBody UserUpdateDTO UserUpdateDTO){
+    public Result updateUserInfo(@RequestBody UserUpdateDTO UserUpdateDTO, @PathVariable Integer id){
         log.info("更新用户信息：" + UserUpdateDTO);
-        authService.modifyUpdateUser(UserUpdateDTO);
+        authService.modifyUpdateUser(UserUpdateDTO, id);
         return Result.success();
     }
 

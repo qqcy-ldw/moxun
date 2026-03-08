@@ -21,6 +21,7 @@
 
     <select id="listUsers" resultType="com.moxun.Pojo.Vo.UserListVO">
         SELECT
+        u.id,
         u.username,
         u.real_name,
         u.phone,

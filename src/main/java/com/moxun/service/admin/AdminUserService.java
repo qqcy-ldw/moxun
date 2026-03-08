@@ -9,4 +9,6 @@ public interface AdminUserService {
     PageResult listUsers(String username, Integer page, Integer pageSize, Integer status);
 
     void deleteUser(List<Integer> id);
+
+    void setUserStatus(Integer id, Integer status);
 }

@@ -2,9 +2,12 @@ package com.moxun.service.admin;
 
 import com.moxun.Pojo.Dto.CourseCreateDTO;
 import com.moxun.Pojo.Dto.CourseUpdateDTO;
+import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.CourseDetailVO;
 import com.moxun.Pojo.Vo.CourseListItemVO;
 import com.moxun.Pojo.Vo.PageResult;
+
+import java.util.List;
 
 /**
  * 课程管理 Service 接口
@@ -40,4 +43,6 @@ public interface AdminCourseService {
      * 删除课程
      */
     void deleteCourse(Long id);
+
+    List getTeacher();
 }

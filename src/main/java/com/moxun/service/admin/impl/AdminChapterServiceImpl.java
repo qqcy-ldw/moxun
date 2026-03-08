@@ -4,6 +4,7 @@ import com.moxun.Pojo.Dto.ChapterSaveDTO;
 import com.moxun.Pojo.Entity.Chapter;
 import com.moxun.Pojo.Entity.Section;
 import com.moxun.Pojo.Vo.ChapterVO;
+import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.exception.BusinessException;
 import com.moxun.mapper.admin.AdminChapterMapper;
 import com.moxun.service.admin.AdminChapterService;
@@ -28,6 +29,17 @@ public class AdminChapterServiceImpl implements AdminChapterService {
 
     @Autowired
     private AdminChapterMapper adminChapterMapper;
+
+
+    /**
+     * 获取章节列表
+     *
+     * @return 章节列表
+     */
+//    @Override
+//    public PageResult<Chapter> listChapters() {
+//        return null;
+//    }
 
     /**
      * 获取课程下的章节列表（含课时）
@@ -87,6 +99,11 @@ public class AdminChapterServiceImpl implements AdminChapterService {
      */
     @Override
     public void updateChapter(ChapterSaveDTO dto) {
+        log.info("业务层dto{}", dto);
+        if (dto.getId() == null){
+            throw new BusinessException("章节ID不能为空");
+        }
+        if (dto.getCourseId() == null) throw new BusinessException("课程ID不能为空");
         adminChapterMapper.updateChapter(dto);
     }
 
@@ -103,14 +120,14 @@ public class AdminChapterServiceImpl implements AdminChapterService {
             throw new IllegalArgumentException("章节ID不能为空");
         }
         // 2. 判断章节是否存在
-        Chapter chapterById = adminChapterMapper.getChapterById(id);
-        if (Objects.isNull(chapterById)) {
+        Chapter chapter = adminChapterMapper.getChapterById(id);
+        if (Objects.isNull(chapter)) {
              throw new BusinessException("章节不存在");
          }
 
         // 3. 删除课时(当前章节ID有课时就删除)
-        Section section = adminChapterMapper.isSections(id);
-        if (Objects.nonNull(section)){
+        int sectionCount = adminChapterMapper.countSectionsByChapterId(id);
+        if (sectionCount > 0){
             adminChapterMapper.deleteSections(id);
         }
 
@@ -123,4 +140,5 @@ public class AdminChapterServiceImpl implements AdminChapterService {
 
         log.info("章节删除成功，ID：{}", id);
     }
+
 }

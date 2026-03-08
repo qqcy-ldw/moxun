@@ -26,6 +26,12 @@ public class UserUpdateDTO implements Serializable {
     private String username;
 
     /**
+     * 真实姓名
+     */
+    @Size(min = 2, max = 30, message = "真实姓名长度在2-30个字符")
+    private String realName;
+
+    /**
      * 邮箱
      */
     @Email(message = "邮箱格式不正确")

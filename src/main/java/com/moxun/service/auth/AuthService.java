@@ -41,7 +41,7 @@ public interface AuthService {
      * 修改用户信息
      * @param userUpdateDTO
      */
-    void modifyUpdateUser(UserUpdateDTO userUpdateDTO);
+    void modifyUpdateUser(UserUpdateDTO userUpdateDTO, Integer targetUserId);
 
     /**
      * 上传用户头像到数据库

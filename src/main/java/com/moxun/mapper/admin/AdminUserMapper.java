@@ -7,6 +7,7 @@ import com.moxun.Pojo.Vo.UserListVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -27,4 +28,7 @@ public interface AdminUserMapper {
     void deleteRole(Integer integer);
 
     void deleteRoles(List<Integer> id);
+
+    @Update("update users set status = #{status} where id = #{id}")
+    void updateUserStatus(Integer id, Integer status);
 }

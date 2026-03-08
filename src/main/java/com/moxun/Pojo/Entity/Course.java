@@ -80,4 +80,8 @@ public class Course implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
+
+
+    //教师名称 前段展示字段
+    private String teacherName;
 }

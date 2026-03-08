@@ -90,14 +90,14 @@ public class AdminUserController {
      * 权限：ADMIN 角色 或 system:user:edit 权限
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:edit')")
-    @PutMapping("/{id}")
-    public Result<String> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+    @PutMapping("/{targetUserId}")
+    public Result<String> updateUser(@RequestBody UserUpdateDTO userUpdateDTO, @PathVariable Integer targetUserId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = authentication.getName();
         
         log.info("【权限控制测试】用户 {} 正在编辑用户 - 用户姓名: {}", currentUser, userUpdateDTO.getUsername());
 
-        authService.modifyUpdateUser(userUpdateDTO);
+        authService.modifyUpdateUser(userUpdateDTO, targetUserId);
         
         return Result.success("编辑成功！操作人：" + currentUser);
     }
@@ -119,6 +119,18 @@ public class AdminUserController {
         
         return Result.success("删除成功！操作人：" + currentUser);
     }
+
+    /**
+     * 修改用户状态
+     *
+     * 权限：ADMIN 角色 或 system:user:edit 权限
+     */
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:edit')")
+    @PutMapping("/id/{status}")
+    public Result setUserStatus(@RequestParam Integer id, @PathVariable Integer status) {
+        userService.setUserStatus(id, status);
+        return Result.success();
+    }
     
     /**
      * 获取当前登录用户的权限信息
@@ -126,6 +138,7 @@ public class AdminUserController {
      * 这个接口不需要特殊权限，只要登录即可访问
      * 用于测试和调试
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/my-permissions")
     public Result<PermissionInfo> getMyPermissions() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

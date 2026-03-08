@@ -3,8 +3,25 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.moxun.mapper.admin.AdminCourseMapper">
 
-    <resultMap id="courseMap" type="com.moxun.Pojo.Entity.Course">
-        <!-- 课程基本属性 -->
+    <!-- 章节VO：含课时列表，供 courseMap 引用 -->
+    <resultMap id="chapterMap" type="com.moxun.Pojo.Vo.ChapterVO">
+        <id property="id" column="chapter_id" />
+        <result property="title" column="chapter_title" />
+        <result property="sort" column="chapter_sort" />
+        <result property="createTime" column="chapter_create_time" />
+        <collection property="sections" ofType="com.moxun.Pojo.Vo.SectionVO">
+            <id property="id" column="section_id" />
+            <result property="title" column="section_title" />
+            <result property="videoUrl" column="section_video_url" />
+            <result property="duration" column="section_duration" />
+            <result property="isFree" column="section_is_free" />
+            <result property="sort" column="section_sort" />
+            <result property="createTime" column="section_create_time" />
+        </collection>
+    </resultMap>
+
+    <!-- 课程详情VO：含章节和课时 -->
+    <resultMap id="courseMap" type="com.moxun.Pojo.Vo.CourseDetailVO">
         <id property="id" column="id" />
         <result property="title" column="title" />
         <result property="description" column="description" />
@@ -14,50 +31,90 @@
         <result property="level" column="level" />
         <result property="duration" column="duration" />
         <result property="teacherId" column="teacher_id" />
-        <result property="status" column="status" />
         <result property="studentCount" column="student_count" />
+        <result property="status" column="status" />
         <result property="createTime" column="create_time" />
         <result property="updateTime" column="update_time" />
-
-        <!-- 章节集合，元素类型为 ChapterVO -->
-        <collection property="chapters" ofType="com.moxun.Pojo.Vo.ChapterVO">
-            <id property="id" column="chapter_id" />
-            <result property="title" column="chapter_title" />
-            <result property="sort" column="chapter_sort" />
-            <result property="createTime" column="chapter_create_time" />
-
-            <!-- 课时集合，元素类型为 SectionVO -->
-            <collection property="sections" ofType="com.moxun.Pojo.Vo.SectionVO">
-                <id property="id" column="section_id" />
-                <result property="title" column="section_title" />
-                <result property="videoUrl" column="section_video_url" />
-                <result property="duration" column="section_duration" />
-                <result property="isFree" column="section_is_free" />
-                <result property="sort" column="section_sort" />
-                <result property="createTime" column="section_create_time" />
-            </collection>
-        </collection>
+        <collection property="chapters" resultMap="chapterMap" />
     </resultMap>
-
-    <select id="listCourses" resultType="com.moxun.Pojo.Entity.Course">
-        select *
-        from courses
-        <where>
+    <insert id="addCourse">
+        insert into courses (title, description, cover_image, price, category_id, level, duration, teacher_id, student_count, status, create_time, update_time)
+        values (#{title}, #{description}, #{coverImage}, #{price}, #{categoryId}, #{level}, #{duration}, #{teacherId}, #{studentCount}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+    <update id="updateCourse">
+        update courses
+        <set>
             <if test="title != null and title != ''">
-                title like concat('%',#{title},'%')
+                title = #{title},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+            <if test="coverImage != null and coverImage != ''">
+                cover_image = #{coverImage},
+            </if>
+            <if test="price != null">
+                price = #{price},
             </if>
             <if test="categoryId != null">
-                and category_id = #{categoryId}
+                category_id = #{categoryId},
+            </if>
+            <if test="level != null">
+                level = #{level},
+            </if>
+            <if test="duration != null">
+                duration = #{duration},
+            </if>
+            <if test="teacherId != null">
+                teacher_id = #{teacherId},
+            </if>
+            <if test="studentCount != null">
+                student_count = #{studentCount},
             </if>
             <if test="status != null">
-                and status = #{status}
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id = #{id}
+
+    </update>
+
+    <select id="listCourses" resultType="com.moxun.Pojo.Vo.CourseListItemVO">
+        select
+        c.id,
+        c.title,
+        c.description,
+        c.cover_image,
+        c.price,
+        c.level,
+        c.student_count,
+        c.create_time,
+        -- 平均分：IFNULL:没有评分的时候放回0，ROUND:保留1位小数更友好
+        ROUND(IFNULL(AVG(cc.rating), 0), 1) as cc.rating
+        from courses c
+        -- 左关联评分表，保证无评分的课程也能查询出来
+        left join course_comments cc on c.id = cc.course_id
+        <where>
+            <if test="title != null and title != ''">
+                c.title like concat('%',#{title},'%')
+            </if>
+            <if test="categoryId != null">
+                and c.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and c.status = #{status}
             </if>
         </where>
+        -- 按课程ID分组，否则聚合函数会把所有课程的评分算成一个平均值
+        group by c.id
     </select>
-    <select id="getCourseById" resultType="com.moxun.Pojo.Vo.CourseDetailVO">
+    <select id="getCourseById" resultMap="courseMap">
         SELECT
             c.id, c.title, c.description, c.cover_image, c.price, c.category_id, c.level,
-            c.duration, c.teacher_id, c.status, c.student_count, c.create_time, c.update_time,
+            c.duration, c.teacher_id, c.student_count, c.status, c.create_time, c.update_time,
             ch.id AS chapter_id,
             ch.title AS chapter_title,
             ch.sort AS chapter_sort,
@@ -74,5 +131,18 @@
                  LEFT JOIN sections s ON ch.id = s.chapter_id
         WHERE c.id = #{id}
         ORDER BY ch.sort, s.sort
+    </select>
+    <select id="getTeacher" resultType="java.util.List">
+        SELECT users.id
+        FROM sys_user_role sur
+                 LEFT JOIN users ON sur.user_id = users.id
+        WHERE sur.role_id = 2
+    </select>
+
+    <select id="getChapter" resultType="java.lang.Integer">
+        SELECT ch.id
+        FROM chapters ch
+                 LEFT JOIN courses c ON ch.course_id = c.id
+        WHERE c.id = #{id}
     </select>
 </mapper>

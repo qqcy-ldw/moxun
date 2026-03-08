@@ -28,7 +28,7 @@ public interface AdminChapterMapper {
     @Delete("delete from chapters where id = #{id}")
     int deleteChapter(Long id);
 
-    Section isSections(Long id);
+    int countSectionsByChapterId(Long id);
 
 //    @Select("")
 //    boolean selectById(Long id);

@@ -2,6 +2,7 @@ package com.moxun.controller.admin;
 
 import com.moxun.Pojo.Dto.CourseCreateDTO;
 import com.moxun.Pojo.Dto.CourseUpdateDTO;
+import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.CourseDetailVO;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.service.admin.AdminCourseService;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 管理员 - 课程管理接口
@@ -55,7 +58,7 @@ public class AdminCourseController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:add')")
     @PostMapping
-    public Result<String> addCourse(@RequestBody CourseCreateDTO dto) {
+    public Result<String> addCourse( @RequestBody CourseCreateDTO dto) {
         adminCourseService.addCourse(dto);
         return Result.success("新增成功");
     }
@@ -79,5 +82,14 @@ public class AdminCourseController {
     public Result<String> deleteCourse(@PathVariable Long id) {
         adminCourseService.deleteCourse(id);
         return Result.success("删除成功");
+    }
+
+    /**
+     * 获取讲师列表
+     * 为添加课程时选择讲师显示
+     */
+    @GetMapping("/teacher")
+    public Result<List> getTeacher() {
+        return Result.success(adminCourseService.getTeacher());
     }
 }

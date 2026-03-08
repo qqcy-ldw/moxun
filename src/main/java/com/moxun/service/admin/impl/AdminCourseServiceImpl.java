@@ -5,14 +5,24 @@ import com.github.pagehelper.PageHelper;
 import com.moxun.Pojo.Dto.CourseCreateDTO;
 import com.moxun.Pojo.Dto.CourseUpdateDTO;
 import com.moxun.Pojo.Entity.Course;
+import com.moxun.Pojo.Entity.Section;
+import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.CourseDetailVO;
+import com.moxun.Pojo.Vo.CourseListItemVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.exception.BusinessException;
+import com.moxun.mapper.admin.AdminChapterMapper;
 import com.moxun.mapper.admin.AdminCommentMapper;
 import com.moxun.mapper.admin.AdminCourseMapper;
+import com.moxun.service.admin.AdminChapterService;
 import com.moxun.service.admin.AdminCourseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 管理员-课程管理
@@ -22,6 +32,12 @@ public class AdminCourseServiceImpl implements AdminCourseService {
 
     @Autowired
     private AdminCourseMapper adminCourseMapper;
+
+    @Autowired
+    private AdminChapterMapper adminChapterMapper;
+
+    @Autowired
+    private AdminChapterService adminChapterService;
 
     /**
      * 课程列表
@@ -36,7 +52,7 @@ public class AdminCourseServiceImpl implements AdminCourseService {
     @Override
     public PageResult listCourses(String title, Long categoryId, String status, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
-        Page<Course> coursePage = adminCourseMapper.listCourses(title, categoryId, status);
+        Page<CourseListItemVO> coursePage = adminCourseMapper.listCourses(title, categoryId, status);
         return new PageResult(coursePage.getTotal(), coursePage.getResult());
     }
 
@@ -60,10 +76,14 @@ public class AdminCourseServiceImpl implements AdminCourseService {
      */
     @Override
     public void addCourse(CourseCreateDTO dto) {
-        // TODO: 实现新增课程（courses 表需 teacher_id，可从当前登录用户获取）
-        //获取
+        if (Objects.isNull(dto.getTeacherId())) throw new RuntimeException("教师ID不能为空");
+        if(Objects.isNull(dto.getPrice())) throw new RuntimeException("价格不能为空");
         Course course = new Course();
         BeanUtils.copyProperties(dto, course);
+        course.setCreateTime(java.time.LocalDateTime.now());
+        course.setUpdateTime(java.time.LocalDateTime.now());
+        int count = adminCourseMapper.addCourse(course);
+        if (count == 0) throw new RuntimeException("新增课程失败");
     }
 
     /**
@@ -73,11 +93,43 @@ public class AdminCourseServiceImpl implements AdminCourseService {
      */
     @Override
     public void updateCourse(CourseUpdateDTO dto) {
-        // TODO: 实现编辑课程
+        if(Objects.isNull(dto.getPrice())) throw new RuntimeException("价格不能为空");
+        Course course = new Course();
+        BeanUtils.copyProperties(dto, course);
+        course.setUpdateTime(java.time.LocalDateTime.now());
+        int count = adminCourseMapper.updateCourse(course);
+        if (count == 0) throw new RuntimeException("编辑课程失败");
+
     }
 
+    /**
+     * 删除课程
+     *
+     * @param id 课程ID
+     */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteCourse(Long id) {
-        // TODO: 实现删除课程（注意外键关联：chapters、sections 等）
+        //获取课程下的所有章节ID
+        List<Integer> chapterIds = adminCourseMapper.getChapter(id);
+        if (chapterIds != null && !chapterIds.isEmpty()) {
+            //删除章节表
+            chapterIds.forEach(chapter -> adminChapterService.deleteChapter(Long.valueOf(chapter)));
+        }
+        //最后删除课程本身
+        int deleted = adminCourseMapper.deleteCourse(id);
+        if (deleted == 0) {
+            // 根据业务，可能课程不存在，可抛异常或记录日志
+            throw new BusinessException("删除课程失败，课程不存在或已被删除");
+        }
+    }
+
+    /**
+     * 获取教师信息
+     * 为添加课程准备教师信息
+     */
+    @Override
+    public List getTeacher() {
+        return adminCourseMapper.getTeacher();
     }
 }

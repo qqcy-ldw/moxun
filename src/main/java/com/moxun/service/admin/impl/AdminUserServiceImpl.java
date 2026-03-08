@@ -72,6 +72,16 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
     }
 
+    @Override
+    public void setUserStatus(Integer id, Integer status) {
+        log.info("更新用户状态，id：{}", id);
+        if (status == null) {
+            throw new BusinessException("状态不能为空");
+        }
+        adminUserMapper.updateUserStatus(id, status);
+        log.info("更新用户状态，id：{}，status：{}", id, status);
+    }
+
 
 //    public Boolean isAdmin() {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

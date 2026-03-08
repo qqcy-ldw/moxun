@@ -3,10 +3,7 @@ package com.moxun.mapper.auth;
 
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.UserProfileVO;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -50,7 +47,7 @@ public interface AuthMapper {
      * 修改用户信息（动态更新）
      * @param user 用户信息
      */
-    void modifyUpdateUser(User user);
+    int modifyUpdateUser(User user);
 
     /**
      * 上传用户头像
@@ -99,4 +96,12 @@ public interface AuthMapper {
      */
     @Insert("insert into sys_user_role(user_id, role_id) values(#{userId}, #{roleId})")
     void setRole(Long userId, Integer roleId);
+
+    /**
+     * 根据用户ID查询用户信息
+     * @param userId 用户ID
+     * @return 用户信息
+     */
+    @Select("select * from users where id = #{userId}")
+    User getById(Long userId);
 }

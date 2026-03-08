@@ -52,7 +52,7 @@ public class LoginDTO implements Serializable {
      * 手机号
      */
     @Pattern(regexp = "^1[3-9]\\\\d{9}$", message = "手机格式不正确")
-    private Integer phone;
+    private String phone;
 
     /**
      * 性别:1-男，0-女

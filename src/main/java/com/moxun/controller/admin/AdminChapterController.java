@@ -3,6 +3,7 @@ package com.moxun.controller.admin;
 import com.moxun.Pojo.Dto.ChapterSaveDTO;
 import com.moxun.Pojo.Entity.Chapter;
 import com.moxun.Pojo.Vo.ChapterVO;
+import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.service.admin.AdminChapterService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -26,6 +27,20 @@ public class AdminChapterController {
 
     @Autowired
     private AdminChapterService adminChapterService;
+
+//    /**
+//     * 获取章节列表
+//     * GET /admin/chapters
+//     */
+//    @PreAuthorize("hasRole('ADMIN') and hasAuthority('course:view')")
+//    @GetMapping
+//    public Result<PageResult<Chapter>> listChapters(
+//            @RequestParam(defaultValue = "1") Integer pageNum,
+//            @RequestParam(defaultValue = "10") Integer pageSize
+//    ) {
+//        PageResult<Chapter> list = adminChapterService.listChapters();
+//        return Result.success(list);
+//    }
 
     /**
      * 获取课程的章节列表（含课时）
@@ -73,10 +88,11 @@ public class AdminChapterController {
      * @param id  章节ID
      * @param dto 章节信息
      */
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
+//    @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PutMapping("/{id}")
     public Result<String> updateChapter(@Valid @PathVariable Long id, @RequestBody ChapterSaveDTO dto) {
         dto.setId(id);
+        log.info("控制层dto{}", dto);
         adminChapterService.updateChapter(dto);
         return Result.success("编辑成功");
     }
