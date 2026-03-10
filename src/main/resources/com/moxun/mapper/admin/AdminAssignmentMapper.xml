@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxun.mapper.admin.AdminAssignmentMapper">
+
+    <!--
+    ========================================
+    作业管理 Mapper XML 映射文件
+    ========================================
+    
+    功能说明：
+    1. 作业列表分页查询（支持按课程筛选）
+    2. 作业详情查询
+    3. 作业新增/更新
+    4. 学生提交列表查询（支持按批改状态筛选）
+    5. 作业批改
+    
+    技术要点：
+    - 使用 <where> 标签处理动态条件
+    - 使用 <set> 标签处理动态更新
+    - 使用 <if> 标签处理条件判断
+    -->
+
+    <!-- ==================== 作业相关 ==================== -->
+    
+    <!-- 
+    分页查询作业列表
+    - 支持按课程ID筛选
+    - 关联courses表获取课程名称
+    - 按创建时间倒序排列
+    -->
+    <select id="listAssignments" resultType="com.moxun.Pojo.Vo.AssignmentVO">
+        SELECT
+            a.id,
+            a.title,
+            a.description,
+            a.course_id AS courseId,
+            a.deadline,
+            a.total_score AS totalScore,
+            a.create_time AS createTime
+        FROM assignments a
+        <where>
+            <if test="courseId != null">
+                a.course_id = #{courseId}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!-- 
+    根据ID查询作业详情
+    - 获取作业的完整信息
+    -->
+    <select id="getAssignmentById" resultType="com.moxun.Pojo.Vo.AssignmentVO">
+        SELECT
+            a.id,
+            a.title,
+            a.description,
+            a.course_id AS courseId,
+            a.deadline,
+            a.total_score AS totalScore,
+            a.create_time AS createTime
+        FROM assignments a
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 
+    新增作业
+    - useGeneratedKeys: 自动获取数据库生成的主键
+    - keyProperty: 主键值回填到实体的id属性
+    -->
+    <insert id="insertAssignment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO assignments (
+            title, 
+            description, 
+            course_id, 
+            deadline, 
+            total_score, 
+            content, 
+            create_time, 
+            update_time
+        ) VALUES (
+            #{title}, 
+            #{description}, 
+            #{courseId}, 
+            #{deadline}, 
+            #{totalScore}, 
+            #{content}, 
+            #{createTime}, 
+            #{updateTime}
+        )
+    </insert>
+
+    <!-- 
+    更新作业
+    - 使用动态SQL，只更新非空字段
+    - <set> 标签自动处理逗号问题
+    -->
+    <update id="updateAssignment">
+        UPDATE assignments
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="deadline != null">
+                deadline = #{deadline},
+            </if>
+            <if test="totalScore != null">
+                total_score = #{totalScore},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- ==================== 提交相关 ==================== -->
+    
+    <!-- 
+    分页查询某作业的提交列表
+    - 支持按批改状态筛选
+    - graded=0: 待批改（graded_time IS NULL）
+    - graded=1: 已批改（graded_time IS NOT NULL）
+    - graded=null: 全部
+    - 关联users表获取学生信息
+    -->
+    <select id="listSubmissions" resultType="com.moxun.Pojo.Vo.AssignmentSubmissionVO">
+        SELECT
+            s.id,
+            s.assignment_id AS assignmentId,
+            s.user_id AS userId,
+            s.content,
+            s.score,
+            s.feedback,
+            s.submit_time AS submitTime,
+            s.graded_time AS gradedTime
+        FROM assignment_submissions s
+        <where>
+            s.assignment_id = #{assignmentId}
+            <!-- 待批改：graded_time 为 NULL -->
+            <if test="graded != null and graded == 0">
+                AND s.graded_time IS NULL
+            </if>
+            <!-- 已批改：graded_time 不为 NULL -->
+            <if test="graded != null and graded == 1">
+                AND s.graded_time IS NOT NULL
+            </if>
+        </where>
+        ORDER BY s.submit_time DESC
+    </select>
+
+    <!-- 
+    批改作业（更新提交记录）
+    - 更新分数、反馈、批改时间
+    -->
+    <update id="gradeSubmission">
+        UPDATE assignment_submissions
+        SET 
+            score = #{score},
+            feedback = #{feedback},
+            graded_time = #{gradedTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 
+    查询提交的附件列表
+    - 根据提交ID获取所有附件信息
+    -->
+    <select id="listAttachmentsBySubmissionId" resultType="com.moxun.Pojo.Vo.SubmissionAttachmentVO">
+        SELECT
+            id,
+            file_url AS fileUrl,
+            file_name AS fileName,
+            file_size AS fileSize
+        FROM submission_attachments
+        WHERE submission_id = #{submissionId}
+    </select>
+
+</mapper>

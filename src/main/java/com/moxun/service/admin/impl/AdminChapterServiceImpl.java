@@ -125,11 +125,8 @@ public class AdminChapterServiceImpl implements AdminChapterService {
              throw new BusinessException("章节不存在");
          }
 
-        // 3. 删除课时(当前章节ID有课时就删除)
-        int sectionCount = adminChapterMapper.countSectionsByChapterId(id);
-        if (sectionCount > 0){
-            adminChapterMapper.deleteSections(id);
-        }
+        // 3. 删除章节下的所有课时
+        adminChapterMapper.deleteSections(id);
 
         // 4. 删除章节
         int deletedChapters = adminChapterMapper.deleteChapter(id);

@@ -33,11 +33,11 @@ public class AdminCourseCategoryServiceImpl implements AdminCourseCategoryServic
                 filter(
                         courseCategories -> courseCategories.getParentId() == null || courseCategories.getParentId() == 0
             ).toList();
-        log.info("过滤后获取所有分类:{}", courseCategory);
+        log.info("过滤后获取所有分类:{}", rootCategories);
         //使用递归找出子分类
         //1.循环构建树
-        for (CourseCategoryVO courseCategoryVO : courseCategory){
-            buildChildren(courseCategoryVO,courseCategory);
+        for (CourseCategoryVO courseCategoryVO : rootCategories){
+            buildChildren(courseCategoryVO,rootCategories);
         }
         return rootCategories;
     }
@@ -64,7 +64,7 @@ public class AdminCourseCategoryServiceImpl implements AdminCourseCategoryServic
      */
     @Override
     public void addCategory(CourseCategoryDTO courseCategoryDTO) {
-        courseCategoryDTO.setParentId(0);
+//        courseCategoryDTO.setParentId(0);
         courseCategoryDTO.setSort(0);
         adminCourseCategoryMapper.addCategory(courseCategoryDTO);
     }
@@ -91,7 +91,7 @@ public class AdminCourseCategoryServiceImpl implements AdminCourseCategoryServic
         List<CourseCategoryVO> parentCourseCategory =courseCategoryVO.stream()
                 .filter(courseCategory -> courseCategory.getParentId() == null || courseCategory.getParentId() == 0)
                 .toList();
-        //删除顶级父类及以下的子类
+        //递归删除顶级父类及以下的子类
         for (CourseCategoryVO courseCategory : parentCourseCategory){
             if (Long.valueOf(parentId).equals(courseCategory.getId())){
                 List<CourseCategoryVO> posterity = adminCourseCategoryMapper.listChildren(parentId);
@@ -104,13 +104,16 @@ public class AdminCourseCategoryServiceImpl implements AdminCourseCategoryServic
         adminCourseCategoryMapper.delCourseCategory(parentId);
     }
 
-    //2.递归方法
+    /**
+     * 递归构建树
+     * @param parent 父节点
+     * @param allCategories 所有节点
+     */
     private void buildChildren(CourseCategoryVO parent, List<CourseCategoryVO> allCategories) {
         // 1. 找出所有子节点（从完整列表中查找）
         List<CourseCategoryVO> children = allCategories.stream()
                 .filter(category ->
-                        category.getParentId() != null &&  // 防止NPE
-                                parent.getId().equals(category.getParentId())
+                        category.getParentId() != null && parent.getId().equals(category.getParentId())
                 )
                 .sorted(Comparator.comparingInt(CourseCategoryVO::getSort))
                 .collect(Collectors.toList());
