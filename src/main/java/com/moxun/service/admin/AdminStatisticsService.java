@@ -1,5 +1,9 @@
 package com.moxun.service.admin;
 
+import com.moxun.Pojo.Dto.StatisticsDto;
+import com.moxun.Pojo.Vo.TrendStatisticsVo;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,7 +12,21 @@ import java.util.Map;
 public interface AdminStatisticsService {
 
     /**
-     * 仪表盘概览数据
+     * 返回课程数、用户数、作业数等统计信息
      */
-    Map<String, Object> getDashboardOverview();
+    Map<String, Integer> getDashboardOverview();
+
+    Map<String, Integer> getUserStatistics(StatisticsDto statisticsDto);
+
+    Map<String, Integer> getCourseStatistics(StatisticsDto statisticsDto);
+
+    HashMap<String, Integer> getHomeworkStatistics(StatisticsDto statisticsDto);
+
+    HashMap<String, Integer> getQuestionStatistics(StatisticsDto statisticsDto);
+
+    HashMap<String, Integer> getStudyStatistics(StatisticsDto statisticsDto);
+
+    TrendStatisticsVo getTrendStatistics(StatisticsDto statisticsDto);
+
+    HashMap<String, String> getRankStatistics(StatisticsDto statisticsDto);
 }

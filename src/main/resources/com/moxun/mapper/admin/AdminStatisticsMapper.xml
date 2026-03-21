@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxun.mapper.admin.AdminStatisticsMapper">
+
+    <select id="getTrendStatisticsUsers" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM users
+        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getTrendStatisticsCourses" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM courses
+        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getTrendStatisticsHomeworks" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM assignments
+        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getTrendStatisticsQuestions" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM questions
+        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getTrendStatisticsStudies" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM user_learning_records
+        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getRankStatisticsUsers" resultType="java.lang.String">
+        select
+            us.username
+        from users us
+        left join user_learning_records ulr on us.id = ulr.user_id
+        where ulr.create_time >= #{startDate} and ulr.create_time &lt;= #{endDate}
+        group by us.id
+        order by count(ulr.id) desc
+        limit #{topN}
+    </select>
+    <select id="getRankStatisticsUsersActive" resultType="java.lang.String">
+        select
+            us.username
+        from users us
+        left join user_action_logs ual on us.id = ual.user_id
+        where ual.create_time >= #{startDate} and ual.create_time &lt;= #{endDate}
+        group by us.id
+        order by count(ual.id) desc
+        limit #{topN}
+    </select>
+    <select id="getRankStatisticsUsersAnswer" resultType="java.lang.String">
+        select
+            us.username
+        from users us
+        left join answers al on us.id = al.user_id
+        where al.create_time >= #{startDate} and al.create_time &lt;= #{endDate}
+        group by us.id
+        order by count(al.id) desc
+        limit #{topN}
+    </select>
+    <select id="getRankStatisticsUsersCourse" resultType="java.lang.String">
+        select
+            us.username
+        from users us
+        left join user_courses ucs on us.id = ucs.user_id
+        where ucs.join_time >= #{startDate} and ucs.join_time &lt;= #{endDate}
+        group by us.id
+        order by count(ucs.id) desc
+        limit #{topN}
+    </select>
+    <select id="getRankStatisticsUsersDiscussion" resultType="java.lang.String">
+        select
+            us.username
+        from users us
+        left join questions d on us.id = d.user_id
+        where d.create_time >= #{startDate} and d.create_time &lt;= #{endDate}
+        group by us.id
+        order by count(d.id) desc
+        limit #{topN}
+    </select>
+    <select id="getRankStatisticsTeacher" resultType="java.lang.String">
+        select
+            us.username
+        from users us
+        left join courses c on us.id = c.teacher_id
+        where c.create_time >= #{startDate} and c.create_time &lt;= #{endDate}
+        group by us.id
+        order by count(c.id) desc
+        limit #{topN}
+    </select>
+</mapper>

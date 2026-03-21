@@ -3,6 +3,8 @@ package com.moxun;
 import com.moxun.Pojo.Vo.CourseCategoryVO;
 import com.moxun.mapper.admin.AdminCourseCategoryMapper;
 import com.moxun.mapper.auth.AuthMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -114,4 +116,12 @@ class MoxunApplicationTests {
         return rootList;
     }
 
+    @Test
+    void test3() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", "zhengjing");
+        jsonObject.put("age", 18);
+        System.out.println(jsonObject);
+
+    }
 }
