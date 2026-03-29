@@ -26,7 +26,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
         // 管理后台跨域配置
         registry.addMapping("/admin/**")
-                .allowedOriginPatterns("http://localhost:3001", "https://admin.your-domain.com")
+                .allowedOriginPatterns("http://localhost:3000", "https://admin.your-domain.com")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true)

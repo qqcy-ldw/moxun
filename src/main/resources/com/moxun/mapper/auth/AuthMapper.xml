@@ -50,7 +50,7 @@
 
     <!-- 获取用户详细信息 -->
     <select id="getUserInfo" resultType="com.moxun.Pojo.Vo.UserProfileVO">
-        SELECT id, username, email, phone, gender, avatar, status, 
+        SELECT id, username,real_name email, phone, gender, avatar, status,
                last_login_ip, last_login_time, create_time
         FROM users 
         WHERE id = #{id}

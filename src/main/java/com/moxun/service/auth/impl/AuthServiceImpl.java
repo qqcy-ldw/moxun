@@ -176,7 +176,7 @@ public class AuthServiceImpl implements AuthService {
         // 保存用户
         authMapper.CommonRegister(user);
 
-        // 设置用户角色
+        // 设置用户角色（添加用户角色记录）
         authMapper.setRole(user.getId(), loginDTO.getRoleId());
 
 

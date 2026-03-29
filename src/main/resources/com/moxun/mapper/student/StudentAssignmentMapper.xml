@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.student.StudentAssignmentMapper">
+
+    <insert id="submitAssignment">
+        insert into assignment_submissions (assignment_id, user_id, content, submit_time)
+        values (#{assignmentId}, #{userId}, #{content}, #{submitTime})
+    </insert>
+    <select id="getMySubmission" resultType="com.moxun.Pojo.Vo.AssignmentSubmissionVO">
+        select
+            id, assignment_id, user_id, content, score, feedback, submit_time, graded_time
+        from assignment_submissions
+        where assignment_id = #{assignmentId} and user_id = #{userId}
+    </select>
+</mapper>

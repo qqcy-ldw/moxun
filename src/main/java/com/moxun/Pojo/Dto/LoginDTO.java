@@ -25,13 +25,13 @@ public class LoginDTO implements Serializable {
      * 用户名
      */
     @NotBlank(message = "用户名不能为空")
-    @Size(min = 3, max = 50, message = "用户名长度在3-50个字符")
+    @Size(min = 2, max = 50, message = "用户名长度在3-50个字符")
     private String username;
 
     /**
      * 真实姓名
      */
-    @NotBlank(message = "真实姓名不能为空")
+//    @NotBlank(message = "真实姓名不能为空")
     @Size(min = 2, max = 50, message = "真实姓名长度在2-50个字符")
     private String realName;
 
@@ -57,7 +57,7 @@ public class LoginDTO implements Serializable {
     /**
      * 性别:1-男，0-女
      */
-    @NotBlank(message = "性别不能为空")
+//    @NotBlank(message = "性别不能为空")
     private Integer gender;
 
     /**

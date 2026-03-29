@@ -16,7 +16,7 @@ public interface AdminCourseMapper{
 
     CourseDetailVO getCourseById(Long id);
 
-    List getTeacher();
+    List<String> getTeacher();
 
     int addCourse(Course course);
 

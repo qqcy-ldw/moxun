@@ -34,9 +34,6 @@ public class AdminCourseServiceImpl implements AdminCourseService {
     private AdminCourseMapper adminCourseMapper;
 
     @Autowired
-    private AdminChapterMapper adminChapterMapper;
-
-    @Autowired
     private AdminChapterService adminChapterService;
 
     /**
@@ -129,7 +126,7 @@ public class AdminCourseServiceImpl implements AdminCourseService {
      * 为添加课程准备教师信息
      */
     @Override
-    public List getTeacher() {
+    public List<String> getTeacher() {
         return adminCourseMapper.getTeacher();
     }
 }

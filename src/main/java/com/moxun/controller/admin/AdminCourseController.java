@@ -89,7 +89,7 @@ public class AdminCourseController {
      * 为添加课程时选择讲师显示
      */
     @GetMapping("/teacher")
-    public Result<List> getTeacher() {
+    public Result<List<String>> getTeacher() {
         return Result.success(adminCourseService.getTeacher());
     }
 }

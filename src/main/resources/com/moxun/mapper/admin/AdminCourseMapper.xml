@@ -86,6 +86,8 @@
         select
         c.id,
         c.title,
+        cat.name as category,
+        u.username as teacher,
         c.description,
         c.cover_image,
         c.price,
@@ -93,8 +95,10 @@
         c.student_count,
         c.create_time,
         -- 平均分：IFNULL:没有评分的时候放回0，ROUND:保留1位小数更友好
-        ROUND(IFNULL(AVG(cc.rating), 0), 1) as cc.rating
+        ROUND(IFNULL(AVG(cc.rating), 0), 1) as rating
         from courses c
+        left join users u on c.teacher_id = u.id
+        left join course_categories cat on c.category_id = cat.id
         -- 左关联评分表，保证无评分的课程也能查询出来
         left join course_comments cc on c.id = cc.course_id
         <where>
@@ -132,8 +136,8 @@
         WHERE c.id = #{id}
         ORDER BY ch.sort, s.sort
     </select>
-    <select id="getTeacher" resultType="java.util.List">
-        SELECT users.id
+    <select id="getTeacher" resultType="java.lang.String">
+        SELECT users.username
         FROM sys_user_role sur
                  LEFT JOIN users ON sur.user_id = users.id
         WHERE sur.role_id = 2

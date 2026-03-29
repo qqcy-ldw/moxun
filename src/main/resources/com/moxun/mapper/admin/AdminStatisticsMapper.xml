@@ -10,97 +10,113 @@
         WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        group by date(create_time)
     </select>
     <select id="getTrendStatisticsCourses" resultType="java.lang.Integer">
         SELECT
             COUNT(*)
         FROM courses
-        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+        WHERE date(create_time) in <foreach collection="dates" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        group by date(create_time)
     </select>
     <select id="getTrendStatisticsHomeworks" resultType="java.lang.Integer">
         SELECT
             COUNT(*)
         FROM assignments
-        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+        WHERE date(create_time) in <foreach collection="dates" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        group by date(create_time)
     </select>
     <select id="getTrendStatisticsQuestions" resultType="java.lang.Integer">
         SELECT
             COUNT(*)
         FROM questions
-        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+        WHERE date(create_time) in <foreach collection="dates" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        group by date(create_time)
     </select>
     <select id="getTrendStatisticsStudies" resultType="java.lang.Integer">
         SELECT
             COUNT(*)
         FROM user_learning_records
-        WHERE date(create_time) in <foreach collection="date" item="item" separator="," open="(" close=")">
+        WHERE date(create_time) in <foreach collection="dates" item="item" separator="," open="(" close=")">
             #{item}
         </foreach>
+        group by date(create_time)
     </select>
-    <select id="getRankStatisticsUsers" resultType="java.lang.String">
+
+    <select id="getRankStatisticsUsers" resultType="java.util.HashMap">
         select
-            us.username
+            us.username,
+            sum(ulr.duration) as duration
         from users us
-        left join user_learning_records ulr on us.id = ulr.user_id
+        join sys_user_role sur on us.id = sur.user_id
+        join user_learning_records ulr on us.id = ulr.user_id
         where ulr.create_time >= #{startDate} and ulr.create_time &lt;= #{endDate}
-        group by us.id
-        order by count(ulr.id) desc
+        and sur.role_id = 3
+        group by us.username
+        order by duration desc
         limit #{topN}
     </select>
-    <select id="getRankStatisticsUsersActive" resultType="java.lang.String">
+    <select id="getRankStatisticsUsersActive" resultType="java.util.HashMap">
         select
-            us.username
+            us.username,
+            count(ual.user_id) as count
         from users us
-        left join user_action_logs ual on us.id = ual.user_id
+        join user_action_logs ual on us.id = ual.user_id
         where ual.create_time >= #{startDate} and ual.create_time &lt;= #{endDate}
-        group by us.id
-        order by count(ual.id) desc
+        group by us.username
+        order by count desc
         limit #{topN}
     </select>
-    <select id="getRankStatisticsUsersAnswer" resultType="java.lang.String">
+    <select id="getRankStatisticsUsersAnswer" resultType="java.util.HashMap">
         select
-            us.username
+            us.username,
+            count(al.user_id) as count
         from users us
-        left join answers al on us.id = al.user_id
+        join answers al on us.id = al.user_id
         where al.create_time >= #{startDate} and al.create_time &lt;= #{endDate}
-        group by us.id
-        order by count(al.id) desc
+        group by us.username
+        order by count desc
         limit #{topN}
     </select>
-    <select id="getRankStatisticsUsersCourse" resultType="java.lang.String">
+    <select id="getRankStatisticsUsersCourse" resultType="java.util.HashMap">
         select
-            us.username
+            c.title,
+            count(ucs.user_id) as count
         from users us
-        left join user_courses ucs on us.id = ucs.user_id
+        join user_courses ucs on us.id = ucs.user_id
+        join courses c on ucs.course_id = c.id
         where ucs.join_time >= #{startDate} and ucs.join_time &lt;= #{endDate}
-        group by us.id
-        order by count(ucs.id) desc
+        group by c.title
+        order by count desc
         limit #{topN}
     </select>
-    <select id="getRankStatisticsUsersDiscussion" resultType="java.lang.String">
+    <select id="getRankStatisticsUsersDiscussion" resultType="java.util.HashMap">
         select
-            us.username
+            us.username,
+            count(d.id) as count
         from users us
-        left join questions d on us.id = d.user_id
+        join questions d on us.id = d.user_id
         where d.create_time >= #{startDate} and d.create_time &lt;= #{endDate}
-        group by us.id
-        order by count(d.id) desc
+        group by us.username
+        order by count desc
         limit #{topN}
     </select>
-    <select id="getRankStatisticsTeacher" resultType="java.lang.String">
+    <select id="getRankStatisticsTeacher" resultType="java.util.HashMap">
         select
-            us.username
+            us.username,
+            count(uc.user_id) as count
         from users us
-        left join courses c on us.id = c.teacher_id
+        join courses c on us.id = c.teacher_id
+        join user_courses uc on c.id = uc.course_id
         where c.create_time >= #{startDate} and c.create_time &lt;= #{endDate}
-        group by us.id
-        order by count(c.id) desc
+        group by us.username
+        order by count desc
         limit #{topN}
     </select>
 </mapper>

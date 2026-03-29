@@ -17,9 +17,11 @@ import com.moxun.util.Result;
 import com.moxun.util.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,7 +63,7 @@ public class AuthController {
      * @return 登录结果（token、用户信息等）
      */
     @PostMapping("/login")
-    public Result CommonLogin(@RequestBody LoginDTO loginDTO, HttpServletRequest request) throws Exception {
+    public Result CommonLogin(@Validated @RequestBody LoginDTO loginDTO, HttpServletRequest request) throws Exception {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
         String captcha = loginDTO.getCaptcha();

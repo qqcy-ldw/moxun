@@ -44,5 +44,5 @@ public interface AdminCourseService {
      */
     void deleteCourse(Long id);
 
-    List getTeacher();
+    List<String> getTeacher();
 }

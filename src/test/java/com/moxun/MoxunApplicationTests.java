@@ -1,8 +1,12 @@
 package com.moxun;
 
+import com.moxun.Pojo.Dto.StatisticsDto;
 import com.moxun.Pojo.Vo.CourseCategoryVO;
 import com.moxun.mapper.admin.AdminCourseCategoryMapper;
 import com.moxun.mapper.auth.AuthMapper;
+import com.moxun.service.admin.AdminCourseService;
+import com.moxun.service.admin.AdminStatisticsService;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -14,9 +18,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @SpringBootTest
+@Slf4j
 class MoxunApplicationTests {
 
     @Autowired
@@ -30,6 +36,12 @@ class MoxunApplicationTests {
 
     @Autowired
     private AdminCourseCategoryMapper adminCourseCategoryMapper;
+
+    @Autowired
+    private AdminCourseService adminCourseService;
+
+    @Autowired
+    private AdminStatisticsService adminStatisticsService;
 
     @Test
     void contextLoads() {
@@ -122,6 +134,33 @@ class MoxunApplicationTests {
         jsonObject.put("name", "zhengjing");
         jsonObject.put("age", 18);
         System.out.println(jsonObject);
+    }
 
+    @Test
+    void test4(){
+        try {
+            List<String> teacher = adminCourseService.getTeacher();
+            teacher.forEach(System.out::println);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Test
+    void test5(){
+        try {
+            StatisticsDto statisticsDto = new StatisticsDto();
+            statisticsDto.setStartDate(LocalDate.of(2025, 11, 21));
+            statisticsDto.setEndDate(LocalDate.of(2025, 11, 22));
+            HashMap<String, List<String>> rankStatistics = adminStatisticsService.getRankStatistics(statisticsDto);
+            if (rankStatistics != null){
+                for (String key : rankStatistics.keySet()) {
+                    System.out.println(key + ": " + rankStatistics.get(key));
+                }
+            }
+            System.out.println();
+        } catch (Exception e) {
+            log.error("获取排名统计信息时出错{}", e.getMessage());
+        }
     }
 }

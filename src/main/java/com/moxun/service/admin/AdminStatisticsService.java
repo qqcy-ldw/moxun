@@ -4,6 +4,7 @@ import com.moxun.Pojo.Dto.StatisticsDto;
 import com.moxun.Pojo.Vo.TrendStatisticsVo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,5 +29,5 @@ public interface AdminStatisticsService {
 
     TrendStatisticsVo getTrendStatistics(StatisticsDto statisticsDto);
 
-    HashMap<String, String> getRankStatistics(StatisticsDto statisticsDto);
+    HashMap<String, HashMap<String, Integer>> getRankStatistics(StatisticsDto statisticsDto);
 }

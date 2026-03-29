@@ -23,7 +23,7 @@
         SELECT
         u.id,
         u.username,
-        u.real_name,
+        u.real_name as nickName,
         u.phone,
         u.email,
         u.status,

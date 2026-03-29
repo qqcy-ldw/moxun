@@ -65,17 +65,17 @@ public interface AdminStatisticsMapper {
 
     List<Integer> getTrendStatisticsQuestions(List<LocalDate> dates);
 
-    List<Integer> getTrendStatisticsStudies(StatisticsDto statisticsDto);
+    List<Integer> getTrendStatisticsStudies(List<LocalDate> dates);
 
-    String getRankStatisticsUsers(StatisticsDto statisticsDto);
+    HashMap<String, Integer> getRankStatisticsUsers(StatisticsDto statisticsDto);
 
-    String getRankStatisticsUsersActive(StatisticsDto statisticsDto);
+    HashMap<String, Integer> getRankStatisticsUsersActive(StatisticsDto statisticsDto);
 
-    String getRankStatisticsUsersAnswer(StatisticsDto statisticsDto);
+    HashMap<String, Integer> getRankStatisticsUsersAnswer(StatisticsDto statisticsDto);
 
-    String getRankStatisticsUsersCourse(StatisticsDto statisticsDto);
+    HashMap<String, Integer> getRankStatisticsUsersCourse(StatisticsDto statisticsDto);
 
-    String getRankStatisticsUsersDiscussion(StatisticsDto statisticsDto);
+    HashMap<String, Integer> getRankStatisticsUsersDiscussion(StatisticsDto statisticsDto);
 
-    String getRankStatisticsTeacher(StatisticsDto statisticsDto);
+    HashMap<String, Integer> getRankStatisticsTeacher(StatisticsDto statisticsDto);
 }
