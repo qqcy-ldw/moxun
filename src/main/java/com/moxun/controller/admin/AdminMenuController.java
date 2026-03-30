@@ -3,8 +3,10 @@ package com.moxun.controller.admin;
 import com.moxun.Pojo.Dto.MenuSaveDTO;
 import com.moxun.Pojo.Entity.SysMenu;
 import com.moxun.Pojo.Vo.MenuTreeVO;
+import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.service.admin.AdminMenuService;
 import com.moxun.util.Result;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,12 +42,12 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:view')")
     @GetMapping
-    public Result<List<SysMenu>> listMenus(
+    public Result<PageResult> listMenus(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        List<SysMenu> list = adminMenuService.listMenus(page, pageSize);
-        return Result.success(list);
+        PageResult pageResult = adminMenuService.listMenus(page, pageSize);
+        return Result.success(pageResult);
     }
 
     /**
@@ -63,7 +65,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:add')")
     @PostMapping
-    public Result<String> addMenu(@RequestBody MenuSaveDTO dto) {
+    public Result<String> addMenu(@Valid @RequestBody MenuSaveDTO dto) {
         adminMenuService.addMenu(dto);
         return Result.success("新增成功");
     }
@@ -73,7 +75,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:edit')")
     @PutMapping("/{id}")
-    public Result<String> updateMenu(@PathVariable Long id, @RequestBody MenuSaveDTO dto) {
+    public Result<String> updateMenu(@PathVariable Long id, @Valid @RequestBody MenuSaveDTO dto) {
         dto.setId(id);
         adminMenuService.updateMenu(dto);
         return Result.success("编辑成功");

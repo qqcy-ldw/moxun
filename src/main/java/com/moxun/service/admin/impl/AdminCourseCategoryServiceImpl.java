@@ -37,7 +37,7 @@ public class AdminCourseCategoryServiceImpl implements AdminCourseCategoryServic
         //使用递归找出子分类
         //1.循环构建树
         for (CourseCategoryVO courseCategoryVO : rootCategories){
-            buildChildren(courseCategoryVO,rootCategories);
+            buildChildren(courseCategoryVO,courseCategory);
         }
         return rootCategories;
     }

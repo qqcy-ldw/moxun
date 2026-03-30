@@ -3,6 +3,7 @@ package com.moxun.service.admin;
 import com.moxun.Pojo.Dto.MenuSaveDTO;
 import com.moxun.Pojo.Entity.SysMenu;
 import com.moxun.Pojo.Vo.MenuTreeVO;
+import com.moxun.Pojo.Vo.PageResult;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface AdminMenuService {
     /**
      * 获取菜单列表（扁平，可分页）
      */
-    List<SysMenu> listMenus(Integer page, Integer pageSize);
+    PageResult listMenus(Integer page, Integer pageSize);
 
     /**
      * 根据ID获取菜单详情

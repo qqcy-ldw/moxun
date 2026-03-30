@@ -119,8 +119,8 @@ public class AdminStatisticsController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/rank")
-    public Result<Map<String, HashMap<String, Integer>>> getRankStatistics(@Validated @RequestBody(required = false) StatisticsDto statisticsDto) {
-        HashMap<String, HashMap<String, Integer>> data = adminStatisticsService.getRankStatistics(statisticsDto);
+    public Result<HashMap<String, List<HashMap<String, Integer>>>> getRankStatistics(@Validated @RequestBody(required = false) StatisticsDto statisticsDto) {
+        HashMap<String, List<HashMap<String, Integer>>> data = adminStatisticsService.getRankStatistics(statisticsDto);
         log.info("排行榜数据: {}", data);
         return Result.success(data);
     }

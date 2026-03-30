@@ -56,7 +56,7 @@
         from users us
         join sys_user_role sur on us.id = sur.user_id
         join user_learning_records ulr on us.id = ulr.user_id
-        where ulr.create_time >= #{startDate} and ulr.create_time &lt;= #{endDate}
+        where ulr.create_time >= #{startDate} and ulr.create_time &lt; #{endDate}
         and sur.role_id = 3
         group by us.username
         order by duration desc
@@ -65,10 +65,10 @@
     <select id="getRankStatisticsUsersActive" resultType="java.util.HashMap">
         select
             us.username,
-            count(ual.user_id) as count
+            sum(ual.user_id) as count
         from users us
         join user_action_logs ual on us.id = ual.user_id
-        where ual.create_time >= #{startDate} and ual.create_time &lt;= #{endDate}
+        where ual.create_time >= #{startDate} and ual.create_time &lt; #{endDate}
         group by us.username
         order by count desc
         limit #{topN}
@@ -76,10 +76,10 @@
     <select id="getRankStatisticsUsersAnswer" resultType="java.util.HashMap">
         select
             us.username,
-            count(al.user_id) as count
+            sum(al.user_id) as count
         from users us
         join answers al on us.id = al.user_id
-        where al.create_time >= #{startDate} and al.create_time &lt;= #{endDate}
+        where al.create_time >= #{startDate} and al.create_time &lt; #{endDate}
         group by us.username
         order by count desc
         limit #{topN}
@@ -87,11 +87,11 @@
     <select id="getRankStatisticsUsersCourse" resultType="java.util.HashMap">
         select
             c.title,
-            count(ucs.user_id) as count
+            sum(ucs.user_id) as count
         from users us
         join user_courses ucs on us.id = ucs.user_id
         join courses c on ucs.course_id = c.id
-        where ucs.join_time >= #{startDate} and ucs.join_time &lt;= #{endDate}
+        where ucs.join_time >= #{startDate} and ucs.join_time &lt; #{endDate}
         group by c.title
         order by count desc
         limit #{topN}
@@ -99,10 +99,10 @@
     <select id="getRankStatisticsUsersDiscussion" resultType="java.util.HashMap">
         select
             us.username,
-            count(d.id) as count
+            sum(d.id) as count
         from users us
         join questions d on us.id = d.user_id
-        where d.create_time >= #{startDate} and d.create_time &lt;= #{endDate}
+        where d.create_time >= #{startDate} and d.create_time &lt; #{endDate}
         group by us.username
         order by count desc
         limit #{topN}
@@ -110,11 +110,11 @@
     <select id="getRankStatisticsTeacher" resultType="java.util.HashMap">
         select
             us.username,
-            count(uc.user_id) as count
+            sum(uc.user_id) as count
         from users us
         join courses c on us.id = c.teacher_id
         join user_courses uc on c.id = uc.course_id
-        where c.create_time >= #{startDate} and c.create_time &lt;= #{endDate}
+        where c.create_time >= #{startDate} and c.create_time &lt; #{endDate}
         group by us.username
         order by count desc
         limit #{topN}

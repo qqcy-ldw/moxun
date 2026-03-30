@@ -136,14 +136,8 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
         StatisticsDto statisticsDtos = setDefaultDate(statisticsDto);
         TrendStatisticsVo userStatisticsVo = new TrendStatisticsVo();
         // 返回日期列表（x轴）
-//        ArrayList<LocalDate> list = new ArrayList<>();
-//        userStatisticsVo.setDates(List.of(statisticsDtos.getStartDate()));
-//        if (statisticsDtos.getStartDate().isBefore(statisticsDtos.getEndDate())){
-//            list.add(statisticsDtos.getStartDate().plusDays(1));
-//        }
         List<LocalDate> list = getDateList(statisticsDto);
         userStatisticsVo.setDates(list);
-//        userStatisticsVo.getDates().add(statisticsDtos.getStartDate().plusDays(1));
         // 返回数据列表（y轴）
         try {
             userStatisticsVo.setUsers(adminStatisticsMapper.getTrendStatisticsUsers(getDateList(statisticsDtos)));
@@ -168,9 +162,9 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
      *
      */
     @Override
-    public HashMap<String, HashMap<String, Integer>> getRankStatistics(StatisticsDto statisticsDto) {
+    public HashMap<String, List<HashMap<String, Integer>>> getRankStatistics(StatisticsDto statisticsDto) {
         StatisticsDto statisticsDtos = setDefaultDate(statisticsDto);
-        HashMap<String, HashMap<String, Integer>> date = new HashMap<>();
+        HashMap<String, List<HashMap<String, Integer>>> date = new HashMap<>();
         try {
             date.put("userstudyRank", adminStatisticsMapper.getRankStatisticsUsers(statisticsDtos));
             date.put("useractiveRank", adminStatisticsMapper.getRankStatisticsUsersActive(statisticsDtos));
@@ -179,7 +173,7 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
             date.put("userdiscussionRank", adminStatisticsMapper.getRankStatisticsUsersDiscussion(statisticsDtos));
             date.put("teacherRank", adminStatisticsMapper.getRankStatisticsTeacher(statisticsDtos));
         } catch (Exception e) {
-            log.error("获取排行榜数据失败{}", e.getMessage());
+            log.error("获取排行榜数据失败", e);
             throw new BusinessException("获取排行榜数据失败");
         }
         return date;
@@ -187,6 +181,8 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
 
     /**
      * 设置默认日期(7天前)
+     * ⚠️ 注意：endDate 兜底时 +1 天，使 SQL BETWEEN endDate AND endDate+1DAY
+     * 等价于 endDate 全天覆盖，解决 DATE 函数只到当天 00:00 的边界问题
      */
     public StatisticsDto setDefaultDate(StatisticsDto statisticsDto) {
         if (Objects.isNull(statisticsDto)){
@@ -194,7 +190,15 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
         }
         if (Objects.isNull(statisticsDto.getStartDate())){
             statisticsDto.setStartDate(LocalDate.now().minusDays(7));
-            statisticsDto.setEndDate(LocalDate.now());
+            statisticsDto.setEndDate(LocalDate.now().plusDays(1));
+        } else if (Objects.isNull(statisticsDto.getEndDate())){
+            // 前端传了 startDate 但没传 endDate，兜底设为今天 +1 天
+            // 保证覆盖今天全天，而不是只到昨天
+            statisticsDto.setEndDate(LocalDate.now().plusDays(1));
+        } else {
+            // 前端同时传了起止日期，endDate +1 天补偿 SQL BETWEEN 边界
+            // 使查询范围与前端选择的日期完全一致（包含结束日全天）
+            statisticsDto.setEndDate(statisticsDto.getEndDate().plusDays(1));
         }
         return statisticsDto;
     }

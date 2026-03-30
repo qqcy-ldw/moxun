@@ -109,7 +109,7 @@ class MoxunApplicationTests {
 
         // 3. 构建每个节点的子节点
         for (CourseCategoryVO category : allCategories) {
-            // 从 Map 中获取该节点的子节点
+            // 从 Map中根据当前节点的id获取该节点的子节点列表
             List<CourseCategoryVO> children = childrenMap.get(category.getId());
 
             // 设置子节点（可能为 null，转换为空列表）
@@ -148,19 +148,6 @@ class MoxunApplicationTests {
 
     @Test
     void test5(){
-        try {
-            StatisticsDto statisticsDto = new StatisticsDto();
-            statisticsDto.setStartDate(LocalDate.of(2025, 11, 21));
-            statisticsDto.setEndDate(LocalDate.of(2025, 11, 22));
-            HashMap<String, List<String>> rankStatistics = adminStatisticsService.getRankStatistics(statisticsDto);
-            if (rankStatistics != null){
-                for (String key : rankStatistics.keySet()) {
-                    System.out.println(key + ": " + rankStatistics.get(key));
-                }
-            }
-            System.out.println();
-        } catch (Exception e) {
-            log.error("获取排名统计信息时出错{}", e.getMessage());
-        }
+
     }
 }

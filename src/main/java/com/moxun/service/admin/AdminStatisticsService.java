@@ -29,5 +29,5 @@ public interface AdminStatisticsService {
 
     TrendStatisticsVo getTrendStatistics(StatisticsDto statisticsDto);
 
-    HashMap<String, HashMap<String, Integer>> getRankStatistics(StatisticsDto statisticsDto);
+    HashMap<String, List<HashMap<String, Integer>>> getRankStatistics(StatisticsDto statisticsDto);
 }

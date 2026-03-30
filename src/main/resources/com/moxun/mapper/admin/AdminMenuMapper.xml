@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxun.mapper.admin.AdminMenuMapper">
+
+    <insert id="insertMenu">
+        insert into sys_menu(id, parent_id, menu_name, menu_type, permission, icon, path, component, sort, status, create_time, update_time)
+        values (#{id}, #{parentId}, #{menuName}, #{menuType}, #{permission}, #{icon}, #{path}, #{component}, #{sort}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+    <update id="updateMenu">
+        update sys_menu
+        <set>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+            <if test="menuName != null">
+                menu_name = #{menuName},
+            </if>
+            <if test="menuType != null">
+                menu_type = #{menuType},
+            </if>
+            <if test="permission != null">
+                permission = #{permission},
+            </if>
+            <if test="icon != null">
+                icon = #{icon},
+            </if>
+            <if test="path != null">
+                path = #{path},
+            </if>
+            <if test="component != null">
+                component = #{component},
+            </if>
+            <if test="sort != null">
+                sort = #{sort},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="deleteChildren">
+        delete from sys_menu where parent_id in
+        <foreach item="id" collection="childrenIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

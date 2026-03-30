@@ -31,6 +31,11 @@ public class CourseListItemVO implements Serializable {
     private String title;
 
     /**
+     * 课程状态
+     */
+    private String status;
+
+    /**
      * 课程讲师
      */
     private String teacher;

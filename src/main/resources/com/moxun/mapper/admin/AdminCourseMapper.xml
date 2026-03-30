@@ -86,6 +86,7 @@
         select
         c.id,
         c.title,
+        c.status,
         cat.name as category,
         u.username as teacher,
         c.description,
