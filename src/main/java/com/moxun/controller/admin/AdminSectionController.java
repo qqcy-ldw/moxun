@@ -1,8 +1,10 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.SectionSaveDTO;
 import com.moxun.Pojo.Entity.Section;
 import com.moxun.Pojo.Vo.SectionVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminSectionService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -35,6 +37,7 @@ public class AdminSectionController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/chapter/{chapterId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课时列表")
     public Result<List<SectionVO>> listSectionsByChapter(@PathVariable Long chapterId) {
         List<SectionVO> list = adminSectionService.listSectionsByChapter(chapterId);
         return Result.success(list);
@@ -48,6 +51,7 @@ public class AdminSectionController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课时详情")
     public Result<Section> getSectionById(@PathVariable Long id) {
         Section section = adminSectionService.getSectionById(id);
         return Result.success(section);
@@ -61,6 +65,7 @@ public class AdminSectionController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_SECTION, description = "新增课时", logResult = true)
     public Result<String> addSection(@Valid @RequestBody SectionSaveDTO dto) {
         adminSectionService.addSection(dto);
         return Result.success("新增成功");
@@ -75,6 +80,7 @@ public class AdminSectionController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_SECTION, description = "编辑课时", logResult = true)
     public Result<String> updateSection(@PathVariable Long id, @RequestBody SectionSaveDTO dto) {
         dto.setId(id);
         adminSectionService.updateSection(dto);
@@ -89,6 +95,7 @@ public class AdminSectionController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:delete')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_SECTION, description = "删除课时", logResult = true)
     public Result<String> deleteSection(@PathVariable Long id) {
         adminSectionService.deleteSection(id);
         return Result.success("删除成功");

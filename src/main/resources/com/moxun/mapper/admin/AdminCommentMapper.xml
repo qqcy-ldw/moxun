@@ -5,14 +5,14 @@
 
     <select id="pageListComments" resultType="com.moxun.Pojo.Entity.CourseComment">
         select id, course_id, user_id, content, rating, create_time, update_time
-        from course_comments
-        <where>
-            <if test="courseId != null">
-                and course_id = #{courseId}
-            </if>
-            <if test="rating != null">
-                and rating = #{rating}
-            </if>
-        </where>
+                from course_comments
+                <where>
+                    <if test="courseId != null">
+                        and course_id = #{courseId}
+                    </if>
+                    <if test="rating != null">
+                        and rating = #{rating}
+                    </if>
+                </where>
     </select>
 </mapper>

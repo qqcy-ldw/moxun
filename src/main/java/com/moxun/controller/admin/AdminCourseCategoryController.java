@@ -1,9 +1,11 @@
 package com.moxun.controller.admin;
 
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.CourseCategoryDTO;
 import com.moxun.Pojo.Vo.CourseCategoryVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminCourseCategoryService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class AdminCourseCategoryController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:courseCategory:view')")
     @GetMapping("/list")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程分类列表")
     public Result<List<CourseCategoryVO>> listCategories(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
@@ -65,6 +68,7 @@ public class AdminCourseCategoryController {
      * @param courseCategoryDTO 分类信息
      */
     @PostMapping("/category/add")
+    @UserAction(actionType = ActionType.OTHER, description = "新增课程分类", logResult = true)
     public Result addCategory(@RequestBody CourseCategoryDTO courseCategoryDTO) {
         log.info("添加分类:{}", courseCategoryDTO);
         adminCourseCategoryService.addCategory(courseCategoryDTO);
@@ -78,6 +82,7 @@ public class AdminCourseCategoryController {
      * @param courseCategoryDTO 分类信息
      */
     @PostMapping("/category/update")
+    @UserAction(actionType = ActionType.OTHER, description = "编辑课程分类", logResult = true)
     public Result updateCategory(@RequestBody CourseCategoryDTO courseCategoryDTO) {
         log.info("修改分类:{}", courseCategoryDTO);
         adminCourseCategoryService.updateCategory(courseCategoryDTO);
@@ -91,6 +96,7 @@ public class AdminCourseCategoryController {
      * @param parentId 分类ID
      */
     @GetMapping("/category/delete/{parentId}")
+    @UserAction(actionType = ActionType.OTHER, description = "删除课程分类", logResult = true)
     public Result deleteCategory(@RequestParam Integer parentId) {
         log.info("删除分类:{}", parentId);
         adminCourseCategoryService.deleteCategory(parentId);

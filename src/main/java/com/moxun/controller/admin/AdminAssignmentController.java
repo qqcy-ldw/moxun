@@ -1,10 +1,12 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.AssignmentCreateDTO;
 import com.moxun.Pojo.Dto.AssignmentGradeDTO;
 import com.moxun.Pojo.Dto.AssignmentUpdateDTO;
 import com.moxun.Pojo.Vo.AssignmentVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminAssignmentService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -37,6 +39,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查看作业")
     public Result<PageResult> listAssignments(
             @RequestParam(required = false) Long courseId,
             @RequestParam(defaultValue = "1") Integer page,
@@ -54,6 +57,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询作业详情")
     public Result<AssignmentVO> getAssignmentById(@PathVariable Long id) {
         AssignmentVO vo = adminAssignmentService.getAssignmentById(id);
         return Result.success(vo);
@@ -67,6 +71,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_ASSIGNMENT, description = "新增作业", logResult = true)
     public Result<String> addAssignment(@Valid @RequestBody AssignmentCreateDTO dto) {
         adminAssignmentService.addAssignment(dto);
         return Result.success("新增成功");
@@ -81,6 +86,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_ASSIGNMENT, description = "编辑作业", logResult = true)
     public Result<String> updateAssignment(@PathVariable Long id, @RequestBody AssignmentUpdateDTO dto) {
         dto.setId(id);
         adminAssignmentService.updateAssignment(dto);
@@ -95,6 +101,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:delete')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_ASSIGNMENT, description = "删除作业", logResult = true)
     public Result<String> deleteAssignment(@PathVariable Long id) {
         adminAssignmentService.deleteAssignment(id);
         return Result.success("删除成功");
@@ -111,6 +118,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/{assignmentId}/submissions")
+    @UserAction(actionType = ActionType.OTHER, description = "查看作业提交列表")
     public Result<PageResult> listSubmissions(
             @PathVariable Long assignmentId,
             @RequestParam(required = false) Integer graded,
@@ -129,6 +137,7 @@ public class AdminAssignmentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PostMapping("/grade")
+    @UserAction(actionType = ActionType.GRADE_ASSIGNMENT, description = "批改作业", logResult = true)
     public Result<String> gradeAssignment(@Valid @RequestBody AssignmentGradeDTO dto) {
         adminAssignmentService.gradeAssignment(dto);
         return Result.success("批改成功");

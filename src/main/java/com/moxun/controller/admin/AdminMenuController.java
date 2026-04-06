@@ -1,9 +1,11 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.MenuSaveDTO;
 import com.moxun.Pojo.Entity.SysMenu;
 import com.moxun.Pojo.Vo.MenuTreeVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminMenuService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -32,6 +34,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:view')")
     @GetMapping("/tree")
+    @UserAction(actionType = ActionType.OTHER, description = "查询菜单树")
     public Result<List<MenuTreeVO>> listMenuTree() {
         List<MenuTreeVO> tree = adminMenuService.listMenuTree();
         return Result.success(tree);
@@ -42,6 +45,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:view')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询菜单列表")
     public Result<PageResult> listMenus(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
@@ -55,6 +59,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询菜单详情")
     public Result<SysMenu> getMenuById(@PathVariable Long id) {
         SysMenu menu = adminMenuService.getMenuById(id);
         return Result.success(menu);
@@ -65,6 +70,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.OTHER, description = "新增菜单", logResult = true)
     public Result<String> addMenu(@Valid @RequestBody MenuSaveDTO dto) {
         adminMenuService.addMenu(dto);
         return Result.success("新增成功");
@@ -75,6 +81,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:edit')")
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "编辑菜单", logResult = true)
     public Result<String> updateMenu(@PathVariable Long id, @Valid @RequestBody MenuSaveDTO dto) {
         dto.setId(id);
         adminMenuService.updateMenu(dto);
@@ -86,6 +93,7 @@ public class AdminMenuController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:menu:delete')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "删除菜单", logResult = true)
     public Result<String> deleteMenu(@PathVariable Long id) {
         adminMenuService.deleteMenu(id);
         return Result.success("删除成功");

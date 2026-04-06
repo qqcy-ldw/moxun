@@ -1,9 +1,11 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.ChapterSaveDTO;
 import com.moxun.Pojo.Entity.Chapter;
 import com.moxun.Pojo.Vo.ChapterVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminChapterService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -50,6 +52,7 @@ public class AdminChapterController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/course/{courseId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程章节列表")
     public Result<List<ChapterVO>> listChaptersByCourse(@PathVariable Long courseId) {
         List<ChapterVO> list = adminChapterService.listChaptersByCourse(courseId);
         return Result.success(list);
@@ -63,6 +66,7 @@ public class AdminChapterController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询章节详情")
     public Result<Chapter> getChapterById(@PathVariable Long id) {
         Chapter chapter = adminChapterService.getChapterById(id);
         return Result.success(chapter);
@@ -76,6 +80,7 @@ public class AdminChapterController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_CHAPTER, description = "新增章节", logResult = true)
     public Result<String> addChapter(@Valid @RequestBody ChapterSaveDTO dto) {
         adminChapterService.addChapter(dto);
         return Result.success("新增成功");
@@ -90,6 +95,7 @@ public class AdminChapterController {
      */
 //    @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_CHAPTER, description = "编辑章节", logResult = true)
     public Result<String> updateChapter(@Valid @PathVariable Long id, @RequestBody ChapterSaveDTO dto) {
         dto.setId(id);
         log.info("控制层dto{}", dto);
@@ -105,6 +111,7 @@ public class AdminChapterController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:delete')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_CHAPTER, description = "删除章节", logResult = true)
     public Result<String> deleteChapter(@PathVariable Long id) {
         adminChapterService.deleteChapter(id);
         return Result.success("删除成功");

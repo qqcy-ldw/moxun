@@ -1,11 +1,13 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.LoginDTO;
 import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.Pojo.Vo.UserListVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminUserService;
 import com.moxun.service.auth.AuthService;
 import com.moxun.util.Result;
@@ -53,6 +55,7 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:view')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询用户列表")
     public Result<PageResult> listUsers(
             @RequestParam(required = false) String username,
             @RequestParam(defaultValue = "1") Integer page,
@@ -72,6 +75,7 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.OTHER, description = "新增用户", logResult = true)
     public Result<String> addUser(@RequestBody LoginDTO loginDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info("【权限控制测试】Authentication:{}", authentication.toString());
@@ -91,6 +95,7 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:edit')")
     @PutMapping("/{targetUserId}")
+    @UserAction(actionType = ActionType.OTHER, description = "编辑用户", logResult = true)
     public Result<String> updateUser(@RequestBody UserUpdateDTO userUpdateDTO, @PathVariable Integer targetUserId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = authentication.getName();
@@ -111,6 +116,7 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('system:user:delete')")
     @DeleteMapping()
+    @UserAction(actionType = ActionType.OTHER, description = "删除用户", logResult = true)
     public Result<String> deleteUser(@RequestParam List<Integer> id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = authentication.getName();
@@ -127,6 +133,7 @@ public class AdminUserController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:user:edit')")
     @PutMapping("/id/{status}")
+    @UserAction(actionType = ActionType.OTHER, description = "修改用户状态")
     public Result setUserStatus(@RequestParam Integer id, @PathVariable Integer status) {
         userService.setUserStatus(id, status);
         return Result.success();

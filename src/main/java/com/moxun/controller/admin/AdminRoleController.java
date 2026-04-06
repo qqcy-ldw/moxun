@@ -1,7 +1,9 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.RoleSaveDTO;
 import com.moxun.Pojo.Vo.RoleVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminRoleService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class AdminRoleController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:role:view')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询角色列表")
     public Result<List<RoleVO>> listRoles(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
@@ -42,6 +45,7 @@ public class AdminRoleController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:role:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询角色详情")
     public Result<RoleVO> getRoleById(@PathVariable Long id) {
         RoleVO vo = adminRoleService.getRoleById(id);
         return Result.success(vo);
@@ -52,6 +56,7 @@ public class AdminRoleController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:role:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_ROLE, description = "新增角色", logResult = true)
     public Result<String> addRole(@RequestBody RoleSaveDTO dto) {
         adminRoleService.addRole(dto);
         return Result.success("新增成功");
@@ -62,6 +67,7 @@ public class AdminRoleController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:role:edit')")
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_ROLE, description = "编辑角色", logResult = true)
     public Result<String> updateRole(@PathVariable Long id, @RequestBody RoleSaveDTO dto) {
         dto.setId(id);
         adminRoleService.updateRole(dto);
@@ -73,6 +79,7 @@ public class AdminRoleController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('system:role:edit')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_ROLE, description = "删除角色", logResult = true)
     public Result<String> deleteRole(@PathVariable Long id) {
         adminRoleService.deleteRole(id);
         return Result.success("删除成功");

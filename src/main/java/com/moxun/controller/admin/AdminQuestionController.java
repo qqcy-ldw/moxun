@@ -1,7 +1,9 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.Pojo.Vo.QuestionDetailVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminQuestionService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class AdminQuestionController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询问答列表")
     public Result<PageResult> listQuestions(
             @RequestParam(required = false) Long courseId,
             @RequestParam(required = false) String keyword,
@@ -52,6 +55,7 @@ public class AdminQuestionController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询问答详情")
     public Result<QuestionDetailVO> getQuestionDetail(@PathVariable Long id) {
         QuestionDetailVO vo = adminQuestionService.getQuestionDetail(id);
         return Result.success(vo);
@@ -65,6 +69,7 @@ public class AdminQuestionController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "删除问答", logResult = true)
     public Result<String> deleteQuestion(@PathVariable Long id) {
         adminQuestionService.deleteQuestion(id);
         return Result.success("删除成功");
@@ -78,6 +83,7 @@ public class AdminQuestionController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     @PutMapping("/answers/{answerId}/accept")
+    @UserAction(actionType = ActionType.OTHER, description = "采纳问答回答", logResult = true)
     public Result<String> acceptAnswer(@PathVariable Long answerId) {
         adminQuestionService.acceptAnswer(answerId);
         return Result.success("已采纳");

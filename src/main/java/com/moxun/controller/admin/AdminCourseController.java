@@ -1,10 +1,12 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.CourseCreateDTO;
 import com.moxun.Pojo.Dto.CourseUpdateDTO;
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.CourseDetailVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminCourseService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class AdminCourseController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程列表")
     public Result<PageResult> listCourses(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Long categoryId,
@@ -48,6 +51,7 @@ public class AdminCourseController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程详情")
     public Result<CourseDetailVO> getCourseById(@PathVariable Long id) {
         CourseDetailVO vo = adminCourseService.getCourseById(id);
         return Result.success(vo);
@@ -58,6 +62,7 @@ public class AdminCourseController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:add')")
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_COURSE, description = "新增课程", logResult = true)
     public Result<String> addCourse( @RequestBody CourseCreateDTO dto) {
         adminCourseService.addCourse(dto);
         return Result.success("新增成功");
@@ -68,6 +73,7 @@ public class AdminCourseController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:edit')")
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_COURSE, description = "编辑课程", logResult = true)
     public Result<String> updateCourse(@PathVariable Long id, @RequestBody CourseUpdateDTO dto) {
         dto.setId(id);
         adminCourseService.updateCourse(dto);
@@ -79,6 +85,7 @@ public class AdminCourseController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:delete')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_COURSE, description = "删除课程", logResult = true)
     public Result<String> deleteCourse(@PathVariable Long id) {
         adminCourseService.deleteCourse(id);
         return Result.success("删除成功");

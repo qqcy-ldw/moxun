@@ -1,7 +1,9 @@
 package com.moxun.controller.admin;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Entity.CourseComment;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.admin.AdminCommentService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class AdminCommentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询评论列表")
     public Result<PageResult> listComments(
             @RequestParam(required = false) Long courseId,
             @RequestParam(required = false) Integer rating,
@@ -51,6 +54,7 @@ public class AdminCommentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:view')")
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询评论详情")
     public Result<CourseComment> getCommentById(@PathVariable Long id) {
         CourseComment comment = adminCommentService.getCommentById(id);
         return Result.success(comment);
@@ -64,6 +68,7 @@ public class AdminCommentController {
      */
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('course:delete')")
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_COMMENT, description = "删除评论", logResult = true)
     public Result<String> deleteComment(@PathVariable Long id) {
         adminCommentService.deleteComment(id);
         return Result.success("删除成功");
