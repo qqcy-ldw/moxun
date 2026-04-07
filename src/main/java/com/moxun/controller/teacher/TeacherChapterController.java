@@ -1,8 +1,10 @@
 package com.moxun.controller.teacher;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.ChapterSaveDTO;
 import com.moxun.Pojo.Entity.Chapter;
 import com.moxun.Pojo.Vo.ChapterVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.teacher.TeacherChapterService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -36,6 +38,7 @@ public class TeacherChapterController {
      * @param courseId 课程ID
      */
     @GetMapping("/course/{courseId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询章节列表")
     public Result<List<ChapterVO>> listChaptersByCourse(@PathVariable Long courseId) {
         List<ChapterVO> list = teacherChapterService.listChaptersByCourse(courseId);
         return Result.success(list);
@@ -48,6 +51,7 @@ public class TeacherChapterController {
      * @param id 章节ID
      */
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询章节详情")
     public Result<Chapter> getChapterById(@PathVariable Long id) {
         Chapter chapter = teacherChapterService.getChapterById(id);
         return Result.success(chapter);
@@ -60,6 +64,7 @@ public class TeacherChapterController {
      * @param dto 章节信息（courseId, title, sort）
      */
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_CHAPTER, description = "新增章节", logResult = true)
     public Result<String> addChapter(@Valid @RequestBody ChapterSaveDTO dto) {
         teacherChapterService.addChapter(dto);
         return Result.success("新增成功");
@@ -73,6 +78,7 @@ public class TeacherChapterController {
      * @param dto 章节信息
      */
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_CHAPTER, description = "编辑章节", logResult = true)
     public Result<String> updateChapter(@PathVariable Long id, @RequestBody ChapterSaveDTO dto) {
         dto.setId(id);
         teacherChapterService.updateChapter(dto);
@@ -87,6 +93,7 @@ public class TeacherChapterController {
      * @param id 章节ID
      */
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_CHAPTER, description = "删除章节", logResult = true)
     public Result<String> deleteChapter(@PathVariable Long id) {
         teacherChapterService.deleteChapter(id);
         return Result.success("删除成功");

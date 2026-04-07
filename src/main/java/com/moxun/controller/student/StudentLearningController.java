@@ -1,7 +1,9 @@
 package com.moxun.controller.student;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.LearningProgressUpdateDTO;
 import com.moxun.Pojo.Vo.ChapterVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.student.StudentLearningService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class StudentLearningController {
      * 获取课程学习目录（章节+课时）
      */
     @GetMapping("/courses/{courseId}/catalog")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程学习目录")
     public Result<List<ChapterVO>> getCourseCatalog(@PathVariable Long courseId) {
         List<ChapterVO> list = studentLearningService.getCourseCatalog(courseId);
         return Result.success(list);
@@ -38,6 +41,7 @@ public class StudentLearningController {
      * 更新学习进度
      */
     @PostMapping("/progress")
+    @UserAction(actionType = ActionType.STUDY_COURSE, description = "更新学习进度")
     public Result<String> updateProgress(@RequestBody LearningProgressUpdateDTO dto) {
         studentLearningService.updateProgress(dto);
         return Result.success("更新成功");
@@ -47,6 +51,7 @@ public class StudentLearningController {
      * 获取某课程的学习进度概览
      */
     @GetMapping("/courses/{courseId}/progress")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程学习进度")
     public Result<Map<String, Object>> getCourseProgress(@PathVariable Long courseId) {
         Map<String, Object> progress = studentLearningService.getCourseProgress(courseId);
         return Result.success(progress);
@@ -56,6 +61,7 @@ public class StudentLearningController {
      * 获取某课时的学习进度
      */
     @GetMapping("/sections/{sectionId}/progress")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课时学习进度")
     public Result<Map<String, Object>> getSectionProgress(@PathVariable Long sectionId) {
         Map<String, Object> progress = studentLearningService.getSectionProgress(sectionId);
         return Result.success(progress);

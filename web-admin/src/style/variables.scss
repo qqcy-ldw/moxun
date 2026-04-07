@@ -1,0 +1,38 @@
+// 知界教育管理后台 - 中国水墨简约风格配色
+// 高端大气，极简克制，低饱和水墨配色
+
+// 主色调
+$ink-white: #F5F3EE;       // 米白底
+$ink-light: #FAFAF8;       // 更浅米白
+$ink-gray: #2C2C2C;        // 淡墨灰（主文字）
+$ink-gray-light: #666666;  // 浅墨灰（次要文字）
+$ink-gray-lighter: #999999;// 更浅文字
+$ink-blue: #2A5C7A;        // 黛青点缀
+$ink-blue-light: #3A7A9A;  // 浅黛青
+
+// 辅助色
+$success: #5B8C5A;         // 苔绿
+$warning: #C9A96E;         // 枯黄
+$danger: #B85C5C;          // 胭脂
+$info: #7A8B99;            // 烟灰
+
+// 边框与分割
+$border-color: #E5E2DC;    // 淡墨边框
+$border-light: #EEEBE4;    // 浅分割线
+$divider: #F0EDE6;         // 分割线
+
+// 阴影色（墨色渐变）
+$shadow-sm: 0 1px 2px rgba(44, 44, 44, 0.05);
+$shadow-md: 0 4px 12px rgba(44, 44, 44, 0.08);
+$shadow-lg: 0 8px 24px rgba(44, 44, 44, 0.12);
+
+// 圆角
+$radius-sm: 4px;
+$radius-md: 6px;
+$radius-lg: 8px;
+
+// 字体
+$font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+
+// 过渡
+$transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

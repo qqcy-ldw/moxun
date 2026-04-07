@@ -1,9 +1,11 @@
 package com.moxun.controller.student;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.CourseCommentCreateDTO;
 import com.moxun.Pojo.Vo.CourseDetailVO;
 import com.moxun.Pojo.Vo.CourseListItemVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.student.StudentCourseService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class StudentCourseController {
      * 分页查询课程列表（已发布）
      */
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程列表")
     public Result<PageResult> listCourses(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Long categoryId,
@@ -46,6 +49,7 @@ public class StudentCourseController {
      * 课程详情（含章节、课时）
      */
     @GetMapping("/{courseId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程详情")
     public Result<CourseDetailVO> getCourseDetail(@PathVariable Long courseId) {
         CourseDetailVO vo = studentCourseService.getCourseDetail(courseId);
         return Result.success(vo);
@@ -55,6 +59,7 @@ public class StudentCourseController {
      * 选课（加入我的课程）
      */
     @PostMapping("/{courseId}/join")
+    @UserAction(actionType = ActionType.ENROLL_COURSE, description = "选课", logResult = true)
     public Result<String> joinCourse(@PathVariable Long courseId) {
         studentCourseService.joinCourse(courseId);
         return Result.success("选课成功");
@@ -64,6 +69,7 @@ public class StudentCourseController {
      * 我的课程列表
      */
     @GetMapping("/my")
+    @UserAction(actionType = ActionType.OTHER, description = "查询我的课程列表")
     public Result<List<CourseListItemVO>> listMyCourses(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
@@ -76,6 +82,7 @@ public class StudentCourseController {
      * 收藏课程
      */
     @PostMapping("/{courseId}/favorite")
+    @UserAction(actionType = ActionType.FAVORITE_COURSE, description = "收藏课程", logResult = true)
     public Result<String> favoriteCourse(@PathVariable Long courseId) {
         studentCourseService.favoriteCourse(courseId);
         return Result.success("收藏成功");
@@ -85,6 +92,7 @@ public class StudentCourseController {
      * 取消收藏
      */
     @DeleteMapping("/{courseId}/favorite")
+    @UserAction(actionType = ActionType.UNFAVORITE_COURSE, description = "取消收藏", logResult = true)
     public Result<String> unfavoriteCourse(@PathVariable Long courseId) {
         studentCourseService.unfavoriteCourse(courseId);
         return Result.success("已取消收藏");
@@ -94,6 +102,7 @@ public class StudentCourseController {
      * 我的收藏列表
      */
     @GetMapping("/my/favorites")
+    @UserAction(actionType = ActionType.OTHER, description = "查询我的收藏列表")
     public Result<List<CourseListItemVO>> listMyFavorites(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
@@ -106,6 +115,7 @@ public class StudentCourseController {
      * 课程评论列表
      */
     @GetMapping("/{courseId}/comments")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程评论")
     public Result<PageResult> listCourseComments(
             @PathVariable Long courseId,
             @RequestParam(defaultValue = "1") Integer page,
@@ -119,6 +129,7 @@ public class StudentCourseController {
      * 发表课程评论
      */
     @PostMapping("/{courseId}/comments")
+    @UserAction(actionType = ActionType.CREATE_COMMENT, description = "发表课程评论", logResult = true)
     public Result<String> createCourseComment(
             @PathVariable Long courseId,
             @Valid @RequestBody CourseCommentCreateDTO dto

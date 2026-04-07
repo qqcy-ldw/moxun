@@ -9,6 +9,12 @@
 3. 数据量适中，确保排行有意义
 */
 
+ALTER TABLE moxun.user_action_logs
+    ADD COLUMN request_id VARCHAR(50) DEFAULT NULL COMMENT '请求ID（用于日志链路追踪）' AFTER duration;
+
+ALTER TABLE user_action_logs
+    ADD COLUMN response_result TEXT COMMENT '错误响应结果（仅记录接口返回错误时的响应内容）';
+
 -- =============================================
 -- 1. 插入 user_learning_records（学习记录） - 用于趋势和排行
 -- 注意：表结构为 (id, user_id, course_id, section_id, start_time, end_time, duration, create_time)

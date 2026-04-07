@@ -1,8 +1,10 @@
 package com.moxun.controller.student;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.AssignmentSubmitDTO;
 import com.moxun.Pojo.Vo.AssignmentSubmissionVO;
 import com.moxun.Pojo.Vo.AssignmentVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.student.StudentAssignmentService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -30,6 +32,7 @@ public class StudentAssignmentController {
      * 获取某课程的作业列表
      */
     @GetMapping("/course/{courseId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程作业列表")
     public Result<List<AssignmentVO>> listAssignmentsByCourse(@PathVariable Long courseId) {
         List<AssignmentVO> list = studentAssignmentService.listAssignmentsByCourse(courseId);
         return Result.success(list);
@@ -39,6 +42,7 @@ public class StudentAssignmentController {
      * 作业详情
      */
     @GetMapping("/{assignmentId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询作业详情")
     public Result<AssignmentVO> getAssignmentById(@PathVariable Long assignmentId) {
         AssignmentVO vo = studentAssignmentService.getAssignmentById(assignmentId);
         return Result.success(vo);
@@ -48,6 +52,7 @@ public class StudentAssignmentController {
      * 提交作业
      */
     @PostMapping("/submit")
+    @UserAction(actionType = ActionType.SUBMIT_ASSIGNMENT, description = "提交作业", logResult = true)
     public Result<String> submitAssignment(@Valid @RequestBody AssignmentSubmitDTO dto) {
         studentAssignmentService.submitAssignment(dto);
         return Result.success("提交成功");
@@ -57,6 +62,7 @@ public class StudentAssignmentController {
      * 我的提交记录（某作业）
      */
     @GetMapping("/{assignmentId}/my-submission")
+    @UserAction(actionType = ActionType.OTHER, description = "查询我的作业提交")
     public Result<AssignmentSubmissionVO> getMySubmission(@PathVariable Long assignmentId) {
         AssignmentSubmissionVO vo = studentAssignmentService.getMySubmission(assignmentId);
         return Result.success(vo);

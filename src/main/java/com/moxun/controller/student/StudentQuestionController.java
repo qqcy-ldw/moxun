@@ -1,9 +1,11 @@
 package com.moxun.controller.student;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.AnswerCreateDTO;
 import com.moxun.Pojo.Dto.QuestionCreateDTO;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.Pojo.Vo.QuestionDetailVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.student.StudentQuestionService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ public class StudentQuestionController {
      * 分页查询问题列表
      */
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询问题列表")
     public Result<PageResult> listQuestions(
             @RequestParam(required = false) Long courseId,
             @RequestParam(required = false) String keyword,
@@ -43,6 +46,7 @@ public class StudentQuestionController {
      * 问题详情（含回答）
      */
     @GetMapping("/{questionId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询问答详情")
     public Result<QuestionDetailVO> getQuestionDetail(@PathVariable Long questionId) {
         QuestionDetailVO vo = studentQuestionService.getQuestionDetail(questionId);
         return Result.success(vo);
@@ -52,6 +56,7 @@ public class StudentQuestionController {
      * 提问
      */
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_QUESTION, description = "提问", logResult = true)
     public Result<String> createQuestion(@Valid @RequestBody QuestionCreateDTO dto) {
         studentQuestionService.createQuestion(dto);
         return Result.success("发布成功");
@@ -61,6 +66,7 @@ public class StudentQuestionController {
      * 回答
      */
     @PostMapping("/answers")
+    @UserAction(actionType = ActionType.CREATE_ANSWER, description = "回答问题", logResult = true)
     public Result<String> createAnswer(@Valid @RequestBody AnswerCreateDTO dto) {
         studentQuestionService.createAnswer(dto);
         return Result.success("回答成功");
@@ -70,6 +76,7 @@ public class StudentQuestionController {
      * 点赞回答
      */
     @PostMapping("/answers/{answerId}/like")
+    @UserAction(actionType = ActionType.LIKE_ANSWER, description = "点赞回答", logResult = true)
     public Result<String> likeAnswer(@PathVariable Long answerId) {
         studentQuestionService.likeAnswer(answerId);
         return Result.success("点赞成功");
@@ -79,6 +86,7 @@ public class StudentQuestionController {
      * 取消点赞
      */
     @DeleteMapping("/answers/{answerId}/like")
+    @UserAction(actionType = ActionType.OTHER, description = "取消点赞", logResult = true)
     public Result<String> unlikeAnswer(@PathVariable Long answerId) {
         studentQuestionService.unlikeAnswer(answerId);
         return Result.success("已取消点赞");

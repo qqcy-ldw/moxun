@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxun.mapper.statistics.PlatformDailyStatisticMapper">
+
+    <insert id="insert" parameterType="com.moxun.Pojo.Entity.PlatformDailyStatistic">
+        INSERT INTO platform_daily_statistics (
+            stat_date, total_users, new_users, active_users,
+            course_views, lesson_views, total_study_time,
+            assignment_submissions, question_posts, answer_posts, comment_posts,
+            create_time
+        ) VALUES (
+            #{statDate}, #{totalUsers}, #{newUsers}, #{activeUsers},
+            #{courseViews}, #{lessonViews}, #{totalStudyTime},
+            #{assignmentSubmissions}, #{questionPosts}, #{answerPosts}, #{commentPosts},
+            NOW()
+        )
+    </insert>
+
+    <update id="updateByDate" parameterType="com.moxun.Pojo.Entity.PlatformDailyStatistic">
+        UPDATE platform_daily_statistics SET
+            total_users         = #{totalUsers},
+            new_users           = #{newUsers},
+            active_users        = #{activeUsers},
+            course_views        = #{courseViews},
+            lesson_views        = #{lessonViews},
+            total_study_time    = #{totalStudyTime},
+            assignment_submissions = #{assignmentSubmissions},
+            question_posts      = #{questionPosts},
+            answer_posts        = #{answerPosts},
+            comment_posts       = #{commentPosts}
+        WHERE stat_date = #{statDate}
+    </update>
+
+    <delete id="deleteByDate">
+        DELETE FROM platform_daily_statistics WHERE stat_date = #{statDate}
+    </delete>
+
+</mapper>

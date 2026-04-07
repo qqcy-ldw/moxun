@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logback 配置根元素
+    Spring Boot 默认会自动加载 classpath 下的 logback-spring.xml 或 logback-spring.groovy
+-->
+<configuration>
+
+    <!--
+        定义日志格式变量（类似定义常量）
+        占位符：%d{时间格式} [%thread] [%X{key}] %-5level %logger{36} - %msg%n
+
+        各部分含义：
+        - %d{yyyy-MM-dd HH:mm:ss.SSS}  → 时间，精确到毫秒
+        - [%thread]                     → 线程名，如 [http-nio-8080-exec-1]
+        - [%X{requestId}]               → MDC中的请求ID，实现链路追踪
+        - %-5level                      → 日志级别，5个字符宽度（INFO, ERROR 等）
+        - %logger{36}                  → 日志打印的类名，最多36个字符
+        - %msg%n                        → 日志内容 + 换行
+    -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId}] %-5level %logger{36} - %msg%n"/>
+
+    <!--
+        ConsoleAppender：控制台输出 appender
+        把日志打印到 IDE 控制台或终端
+    -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--
+        RollingFileAppender：滚动文件 appender
+        自动分文件存储日志，支持按时间滚动（每天一个新文件）
+    -->
+<!--    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        &lt;!&ndash; 当前日志文件路径 &ndash;&gt;-->
+<!--        <file>logs/moxun.log</file>-->
+
+<!--        &lt;!&ndash; 滚动策略：按时间滚动 &ndash;&gt;-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+<!--            &lt;!&ndash; 归档文件名格式：logs/moxun.2026-04-06.log &ndash;&gt;-->
+<!--            <fileNamePattern>logs/moxun.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+<!--            &lt;!&ndash; 保留30天日志，30天后自动删除旧文件 &ndash;&gt;-->
+<!--            <maxHistory>30</maxHistory>-->
+<!--        </rollingPolicy>-->
+
+<!--        <encoder>-->
+<!--            <pattern>${LOG_PATTERN}</pattern>-->
+<!--            <charset>UTF-8</charset>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+    <!--
+        root：根日志器（所有未指定logger的日志都走这里）
+        level="INFO"：只记录 INFO 级别及以上的日志（DEBUG < INFO < WARN < ERROR）
+
+        appender-ref：引用前面定义的 appender
+        日志会同时输出到 CONSOLE（控制台） 和 FILE（文件）
+    -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+<!--        <appender-ref ref="FILE"/>-->
+    </root>
+
+    <!--
+        logger：指定包的日志配置
+
+        name="com.moxun"           → 对应项目包路径，所有 com.moxun 下的类都用这个logger
+        level="INFO"              → 日志级别
+        additivity="false"        → 关键！不再向上级（root）传递，避免日志重复打印
+
+        如果 additivity="true"（默认），com.moxun 打印的日志会再传给 root 再打一遍
+        设为 false 表示日志只走当前 logger 引用的 appender
+    -->
+    <logger name="com.moxun" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+<!--        <appender-ref ref="FILE"/>-->
+    </logger>
+</configuration>

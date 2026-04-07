@@ -1,9 +1,11 @@
 package com.moxun.controller.teacher;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.CourseCreateDTO;
 import com.moxun.Pojo.Dto.CourseUpdateDTO;
 import com.moxun.Pojo.Vo.CourseDetailVO;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.teacher.TeacherCourseService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class TeacherCourseController {
      * @param pageSize 每页条数
      */
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询我的课程列表")
     public Result<PageResult> listMyCourses(
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "1") Integer page,
@@ -52,6 +55,7 @@ public class TeacherCourseController {
      * @param id 课程ID
      */
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程详情")
     public Result<CourseDetailVO> getMyCourseById(@PathVariable Long id) {
         CourseDetailVO vo = teacherCourseService.getMyCourseById(id);
         return Result.success(vo);
@@ -65,6 +69,7 @@ public class TeacherCourseController {
      * @param dto 课程信息
      */
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_COURSE, description = "新增课程", logResult = true)
     public Result<String> addCourse(@RequestBody CourseCreateDTO dto) {
         teacherCourseService.addCourse(dto);
         return Result.success("新增成功");
@@ -79,6 +84,7 @@ public class TeacherCourseController {
      * @param dto 课程信息
      */
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_COURSE, description = "编辑课程", logResult = true)
     public Result<String> updateCourse(@PathVariable Long id, @RequestBody CourseUpdateDTO dto) {
         dto.setId(id);
         teacherCourseService.updateCourse(dto);

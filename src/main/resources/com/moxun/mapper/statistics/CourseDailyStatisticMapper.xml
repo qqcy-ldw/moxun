@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxun.mapper.statistics.CourseDailyStatisticMapper">
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO course_daily_statistics (
+            course_id, stat_date, view_count, study_count,
+            study_time, new_student_count, comment_count, create_time
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.courseId}, #{item.statDate}, #{item.viewCount},
+                #{item.studyCount}, #{item.studyTime},
+                #{item.newStudentCount}, #{item.commentCount}, NOW()
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE course_daily_statistics SET
+                view_count         = #{item.viewCount},
+                study_count        = #{item.studyCount},
+                study_time         = #{item.studyTime},
+                new_student_count   = #{item.newStudentCount},
+                comment_count      = #{item.commentCount}
+            WHERE course_id = #{item.courseId} AND stat_date = #{item.statDate}
+        </foreach>
+    </update>
+
+    <delete id="deleteByDate">
+        DELETE FROM course_daily_statistics WHERE stat_date = #{statDate}
+    </delete>
+
+</mapper>

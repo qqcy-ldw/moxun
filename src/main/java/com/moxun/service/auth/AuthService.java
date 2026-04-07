@@ -14,7 +14,7 @@ public interface AuthService {
      * @param username
      * @return
      */
-    LoginResultVO CommonLogin(String username, String password, String ipAddress);
+    LoginResultVO CommonLogin(String username, String password, String ipAddress, String captcha);
 
 
     /**

@@ -1,6 +1,8 @@
 package com.moxun.controller.student;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Entity.Notification;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.student.StudentNotificationService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class StudentNotificationController {
      * 我的通知列表
      */
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询通知列表")
     public Result<List<Notification>> listMyNotifications(
             @RequestParam(required = false) Integer isRead,
             @RequestParam(defaultValue = "1") Integer page,
@@ -50,6 +53,7 @@ public class StudentNotificationController {
      * 标记已读
      */
     @PutMapping("/{id}/read")
+    @UserAction(actionType = ActionType.OTHER, description = "标记通知已读")
     public Result<String> markAsRead(@PathVariable Long id) {
         studentNotificationService.markAsRead(id);
         return Result.success("已标记为已读");
@@ -59,6 +63,7 @@ public class StudentNotificationController {
      * 全部标记已读
      */
     @PutMapping("/read-all")
+    @UserAction(actionType = ActionType.OTHER, description = "全部标记已读")
     public Result<String> markAllAsRead() {
         studentNotificationService.markAllAsRead();
         return Result.success("已全部标记为已读");

@@ -1,7 +1,9 @@
 package com.moxun.controller.teacher;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Vo.PageResult;
 import com.moxun.Pojo.Vo.QuestionDetailVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.teacher.TeacherQuestionService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,7 @@ public class TeacherQuestionController {
      * @param pageSize 每页条数
      */
     @GetMapping
+    @UserAction(actionType = ActionType.OTHER, description = "查询问答列表")
     public Result<PageResult> listMyCourseQuestions(
             @RequestParam(required = false) Long courseId,
             @RequestParam(required = false) String keyword,
@@ -52,6 +55,7 @@ public class TeacherQuestionController {
      * @param id 问题ID
      */
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询问答详情")
     public Result<QuestionDetailVO> getQuestionDetail(@PathVariable Long id) {
         QuestionDetailVO vo = teacherQuestionService.getQuestionDetail(id);
         return Result.success(vo);
@@ -64,6 +68,7 @@ public class TeacherQuestionController {
      * @param answerId 回答ID
      */
     @PutMapping("/answers/{answerId}/accept")
+    @UserAction(actionType = ActionType.OTHER, description = "采纳问答回答", logResult = true)
     public Result<String> acceptAnswer(@PathVariable Long answerId) {
         teacherQuestionService.acceptAnswer(answerId);
         return Result.success("已采纳");

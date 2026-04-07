@@ -3,12 +3,14 @@ package com.moxun.controller.auth;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
+import com.moxun.Enum.ActionType;
 import com.moxun.Enum.Folder;
 import com.moxun.Enum.ResultCode;
 import com.moxun.Pojo.Dto.LoginDTO;
 import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Vo.LoginResultVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.exception.BusinessException;
 import com.moxun.service.auth.AuthService;
 import com.moxun.service.auth.FileService;
@@ -52,7 +54,7 @@ public class AuthController {
     private final static String SESSION_KEY = "captcha";
 
     //T0D0: 后续使用redis存储验证码
-    private final ConcurrentHashMap map = new ConcurrentHashMap();
+    public static final ConcurrentHashMap map = new ConcurrentHashMap();
 
     /**
      * 用户登录
@@ -63,6 +65,7 @@ public class AuthController {
      * @return 登录结果（token、用户信息等）
      */
     @PostMapping("/login")
+    @UserAction(actionType = ActionType.LOGIN, description = "用户登录", logResult = true)
     public Result CommonLogin(@Validated @RequestBody LoginDTO loginDTO, HttpServletRequest request) throws Exception {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
@@ -70,11 +73,11 @@ public class AuthController {
         String ipAddress = IpUtil.getClientIpAddress(request);
         log.info("登录用户：" + username);
         log.info("验证码：" + captcha);
-        //TODO 目前只校验了验证码，后续需要完善
-        if (!captcha.equals(map.get(SESSION_KEY))){
-            throw new BusinessException(ResultCode.CAPTCHA_ERROR,"验证码错误");
-        }
-        LoginResultVO loginResultVO = authService.CommonLogin(username, password,ipAddress);
+//        //TODO 目前只校验了验证码，后续需要完善
+//        if (!captcha.equals(map.get(SESSION_KEY))){
+//            throw new BusinessException(ResultCode.CAPTCHA_ERROR,"验证码错误");
+//        }
+        LoginResultVO loginResultVO = authService.CommonLogin(username, password,ipAddress,captcha);
         log.info("登录结果：" + loginResultVO);
         return Result.success(loginResultVO);
     }
@@ -88,6 +91,7 @@ public class AuthController {
      */
     //TODO 完善注册功能：用户名称
     @PostMapping("/register")
+    @UserAction(actionType = ActionType.REGISTER, description = "用户注册", logResult = true)
     public Result CommonRegister(@RequestBody LoginDTO loginDTO){
         authService.CommonRegister(loginDTO);
         log.info("用户注册：" + loginDTO.toString());
@@ -137,6 +141,7 @@ public class AuthController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "获取用户信息")
     public Result<UserProfileVO> getUserInfo(@PathVariable Integer id){
         log.info("获取用户信息：" + id);
         UserProfileVO userinfo = authService.getUserInfo(id);
@@ -154,6 +159,7 @@ public class AuthController {
      */
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/users/{id}")
+    @UserAction(actionType = ActionType.UPDATE_PROFILE, description = "更新用户信息", logResult = true)
     public Result updateUserInfo(@RequestBody UserUpdateDTO UserUpdateDTO, @PathVariable Integer id){
         log.info("更新用户信息：" + UserUpdateDTO);
         authService.modifyUpdateUser(UserUpdateDTO, id);
@@ -171,6 +177,7 @@ public class AuthController {
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/upload/user/avatar")
+    @UserAction(actionType = ActionType.UPLOAD_FILE, description = "上传用户头像", logResult = true)
     public Result<String> uploadUserAvatar(@RequestParam("file") MultipartFile file){
         log.info("上传用户头像：" + file.getOriginalFilename());
         String upload = fileService.upload(file, Folder.AVATAR.getValue());
@@ -187,6 +194,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
+    @UserAction(actionType = ActionType.LOGOUT, description = "用户登出")
     public Result<Void> logout() {
         // 获取当前用户ID
         Map<String, Object> map = UserContext.getCurrentUser();

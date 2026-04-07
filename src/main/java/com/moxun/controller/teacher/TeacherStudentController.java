@@ -1,6 +1,8 @@
 package com.moxun.controller.teacher;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Vo.PageResult;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.teacher.TeacherStudentService;
 import com.moxun.util.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class TeacherStudentController {
      * @param pageSize 每页条数
      */
     @GetMapping("/course/{courseId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课程选课学生")
     public Result<PageResult> listMyCourseStudents(
             @PathVariable Long courseId,
             @RequestParam(required = false) String username,

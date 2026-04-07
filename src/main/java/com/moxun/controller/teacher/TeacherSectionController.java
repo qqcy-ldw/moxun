@@ -1,8 +1,10 @@
 package com.moxun.controller.teacher;
 
+import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.SectionSaveDTO;
 import com.moxun.Pojo.Entity.Section;
 import com.moxun.Pojo.Vo.SectionVO;
+import com.moxun.annotation.UserAction;
 import com.moxun.service.teacher.TeacherSectionService;
 import com.moxun.util.Result;
 import jakarta.validation.Valid;
@@ -36,6 +38,7 @@ public class TeacherSectionController {
      * @param chapterId 章节ID
      */
     @GetMapping("/chapter/{chapterId}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课时列表")
     public Result<List<SectionVO>> listSectionsByChapter(@PathVariable Long chapterId) {
         List<SectionVO> list = teacherSectionService.listSectionsByChapter(chapterId);
         return Result.success(list);
@@ -48,6 +51,7 @@ public class TeacherSectionController {
      * @param id 课时ID
      */
     @GetMapping("/{id}")
+    @UserAction(actionType = ActionType.OTHER, description = "查询课时详情")
     public Result<Section> getSectionById(@PathVariable Long id) {
         Section section = teacherSectionService.getSectionById(id);
         return Result.success(section);
@@ -60,6 +64,7 @@ public class TeacherSectionController {
      * @param dto 课时信息（chapterId, title, videoUrl, duration, sort）
      */
     @PostMapping
+    @UserAction(actionType = ActionType.CREATE_SECTION, description = "新增课时", logResult = true)
     public Result<String> addSection(@Valid @RequestBody SectionSaveDTO dto) {
         teacherSectionService.addSection(dto);
         return Result.success("新增成功");
@@ -73,6 +78,7 @@ public class TeacherSectionController {
      * @param dto 课时信息
      */
     @PutMapping("/{id}")
+    @UserAction(actionType = ActionType.UPDATE_SECTION, description = "编辑课时", logResult = true)
     public Result<String> updateSection(@PathVariable Long id, @RequestBody SectionSaveDTO dto) {
         dto.setId(id);
         teacherSectionService.updateSection(dto);
@@ -86,6 +92,7 @@ public class TeacherSectionController {
      * @param id 课时ID
      */
     @DeleteMapping("/{id}")
+    @UserAction(actionType = ActionType.DELETE_SECTION, description = "删除课时", logResult = true)
     public Result<String> deleteSection(@PathVariable Long id) {
         teacherSectionService.deleteSection(id);
         return Result.success("删除成功");

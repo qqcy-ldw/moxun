@@ -6,6 +6,7 @@ import com.moxun.Pojo.Dto.UserUpdateDTO;
 import com.moxun.Pojo.Entity.User;
 import com.moxun.Pojo.Vo.LoginResultVO;
 import com.moxun.Pojo.Vo.UserProfileVO;
+import com.moxun.controller.auth.AuthController;
 import com.moxun.exception.BusinessException;
 import com.moxun.mapper.auth.AuthMapper;
 import com.moxun.service.auth.AuthService;
@@ -53,6 +54,8 @@ public class AuthServiceImpl implements AuthService {
 
     ConcurrentHashMap<String, Integer> loginFailCount = new ConcurrentHashMap<>();
 
+    private final static String SESSION_KEY = "captcha";
+
     /**
      * 用户登录
      * 
@@ -71,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
      * @return 登录结果（包含Token）
      */
     @Override
-    public LoginResultVO CommonLogin(String username, String password, String ipAddress) {
+    public LoginResultVO CommonLogin(String username, String password, String ipAddress, String captcha) {
         log.info("用户登录请求 - 用户名: {}, IP: {}", username, ipAddress);
 
         try {
@@ -88,6 +91,11 @@ public class AuthServiceImpl implements AuthService {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
             log.info("认证成功 - 用户: {}, 权限: {}", username, authentication.getAuthorities());
+
+            // 校验验证码
+            if (!captcha.equals(AuthController.map.get(SESSION_KEY))){
+            throw new BusinessException(ResultCode.CAPTCHA_ERROR,"验证码错误");
+        }
 
             // 3. 认证成功，清除失败次数
             loginFailCount.remove(username);

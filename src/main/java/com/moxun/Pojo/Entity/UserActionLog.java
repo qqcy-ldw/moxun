@@ -86,9 +86,19 @@ public class UserActionLog implements Serializable {
     private Integer responseCode;
 
     /**
+     * 错误响应结果（仅记录接口返回错误时的响应内容）
+     */
+    private String responseResult;
+
+    /**
      * 操作耗时(毫秒)
      */
     private Integer duration;
+
+    /**
+     * 请求ID（用于日志链路追踪）
+     */
+    private String requestId;
 
     /**
      * 创建时间
