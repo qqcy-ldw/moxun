@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath } from 'url'
 import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [vue()],
@@ -12,6 +15,9 @@ export default defineConfig({
   server: {
     port: 3000,
     host: '0.0.0.0',
+    hmr: {
+      overlay: true
+    },
     proxy: {
       '/auth': {
         target: 'http://localhost:8082',
@@ -21,7 +27,6 @@ export default defineConfig({
         target: 'http://localhost:8082',
         changeOrigin: true
       },
-      // 分类图标等静态资源（后端若提供 /icons 静态目录）
       '/icons': {
         target: 'http://localhost:8082',
         changeOrigin: true

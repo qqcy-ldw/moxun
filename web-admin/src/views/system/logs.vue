@@ -4,9 +4,9 @@
     <div class="search-bar ink-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="用户名">
-          <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable />
+          <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable @input="handleSearchDebounced" />
         </el-form-item>
-        <el-form-item label="操作类型">
+        <el-form-item label="操作类型" class="select-item">
           <el-select v-model="searchForm.actionType" placeholder="请选择操作类型" clearable>
             <el-option
               v-for="item in actionTypes"
@@ -16,7 +16,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="操作状态">
+        <el-form-item label="操作状态" class="select-item">
           <el-select v-model="searchForm.loginStatus" placeholder="请选择状态" clearable>
             <el-option label="成功" :value="1" />
             <el-option label="失败" :value="0" />
@@ -62,7 +62,7 @@
         </el-table-column>
         <el-table-column prop="actionType" label="操作类型" width="120" align="center">
           <template #default="{ row }">
-            <el-tag type="info">{{ row.actionType || 'OTHER' }}</el-tag>
+            <el-tag type="info">{{ getActionTypeName(row.actionType) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="actionDesc" label="操作描述" min-width="160" />
@@ -88,10 +88,16 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="ipAddress" label="IP地址" width="140" align="center" />
+        <el-table-column prop="ipAddress" label="IP地址" width="140" align="center">
+          <template #default="{ row }">
+            <span class="ip-cell" @click.stop="copyToClipboard(row.ipAddress)" :title="'点击复制: ' + row.ipAddress">
+              {{ row.ipAddress || '-' }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="duration" label="耗时" width="100" align="center">
           <template #default="{ row }">
-            <span :class="row.duration > 1000 ? 'error-text' : ''">
+            <span :class="getDurationClass(row.duration)">
               {{ row.duration ? row.duration + 'ms' : '-' }}
             </span>
           </template>
@@ -123,7 +129,7 @@
         <el-descriptions-item label="用户ID">{{ currentLog.userId || '-' }}</el-descriptions-item>
         <el-descriptions-item label="用户名">{{ currentLog.username || '-' }}</el-descriptions-item>
         <el-descriptions-item label="操作类型">
-          <el-tag type="info">{{ currentLog.actionType || 'OTHER' }}</el-tag>
+          <el-tag type="info">{{ getActionTypeName(currentLog.actionType) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="操作描述" :span="2">{{ currentLog.actionDesc || '-' }}</el-descriptions-item>
         <el-descriptions-item label="请求URL" :span="2">
@@ -150,12 +156,18 @@
         <el-descriptions-item label="请求参数" :span="2">
           <div class="json-content" v-if="currentLog.requestParams">
             <pre>{{ formatJson(currentLog.requestParams) }}</pre>
+            <el-button type="primary" text size="small" class="copy-btn" @click="copyToClipboard(formatJson(currentLog.requestParams))">
+              <el-icon><DocumentCopy /></el-icon> 复制
+            </el-button>
           </div>
           <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="错误响应" :span="2" v-if="currentLog.responseResult">
           <div class="json-content error-content">
             <pre>{{ formatJson(currentLog.responseResult) }}</pre>
+            <el-button type="danger" text size="small" class="copy-btn" @click="copyToClipboard(formatJson(currentLog.responseResult))">
+              <el-icon><DocumentCopy /></el-icon> 复制
+            </el-button>
           </div>
         </el-descriptions-item>
         <el-descriptions-item label="失败原因" :span="2" v-if="currentLog.failReason">
@@ -189,10 +201,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { Delete } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { Delete, DocumentCopy } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { actionLogApi } from '@/api'
+import _ from 'lodash'
+
+// 👑 面试考点：防抖搜索，避免每次输入都触发请求
+// lodash 的 debounce 会缓存最后一次调用，常用于搜索框场景
 
 const loading = ref(false)
 const detailVisible = ref(false)
@@ -218,6 +234,33 @@ const pagination = reactive({
 const cleanDays = ref(30)
 
 const tableData = ref([])
+
+// 👑 面试考点：computed 计算属性，根据 actionTypes 映射中文名称
+// 如果没有匹配到，返回原始 code 作为降级方案
+const getActionTypeName = (code) => {
+  const found = actionTypes.value.find(t => t.code === code)
+  return found ? found.description : (code || 'OTHER')
+}
+
+// 👑 面试考点：耗时分级显示，职责分离原则
+// 不同的阈值用对象配置，方便维护
+const getDurationClass = (ms) => {
+  if (!ms) return ''
+  if (ms > 1000) return 'duration-error'    // 异常
+  if (ms > 500) return 'duration-warning'    // 警告
+  return 'duration-normal'                   // 正常
+}
+
+// 👑 面试考点：clipboard API 实现点击复制
+// async/await 处理剪贴板异步操作
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text)
+    ElMessage.success('已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败')
+  }
+}
 
 const getMethodType = (method) => {
   const typeMap = {
@@ -306,6 +349,13 @@ const handleSizeChange = () => {
   fetchData()
 }
 
+// 👑 面试考点：使用 lodash debounce 实现防抖搜索
+// 300ms 内只执行最后一次输入触发搜索
+const handleSearchDebounced = _.debounce(() => {
+  pagination.page = 1
+  fetchData()
+}, 300)
+
 // 页码改变
 const handleCurrentChange = () => {
   fetchData()
@@ -364,6 +414,17 @@ onMounted(() => {
   :deep(.el-form-item) {
     margin-bottom: 0;
   }
+
+  // 👑 面试考点：下拉框与输入框样式统一，使用相同背景色
+  .select-item {
+    :deep(.el-select) {
+      width: 160px;
+
+      .el-input__wrapper {
+        background-color: $ink-white;
+      }
+    }
+  }
 }
 
 .table-area {
@@ -390,6 +451,34 @@ onMounted(() => {
 .error-text {
   color: $ink-red;
   font-weight: 500;
+}
+
+// 👑 面试考点：耗时分级样式，通过不同颜色区分性能状态
+.duration-normal {
+  color: $ink-green;
+}
+
+.duration-warning {
+  color: $warning;
+  font-weight: 500;
+}
+
+.duration-error {
+  color: $ink-red;
+  font-weight: 600;
+}
+
+// 👑 面试考点：IP 单元格可点击，提升用户体验
+.ip-cell {
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color $transition;
+
+  &:hover {
+    background-color: rgba($ink-blue, 0.1);
+    color: $ink-blue;
+  }
 }
 
 .url-text {
@@ -428,6 +517,20 @@ onMounted(() => {
   margin-left: 12px;
   color: #999;
   font-size: 12px;
+}
+
+// 👑 面试考点：JSON 内容区增加复制按钮，提升操作便捷性
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.json-content {
+  position: relative;
 }
 
 :deep(.el-descriptions__label) {

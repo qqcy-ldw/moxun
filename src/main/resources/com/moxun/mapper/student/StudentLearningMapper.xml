@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.student.StudentLearningMapper">
+
+    <!-- 章节VO：含课时列表 -->
+    <resultMap id="ChapterMap" type="com.moxun.Pojo.Vo.ChapterVO">
+        <id property="id" column="chapter_id" />
+        <result property="title" column="chapter_title" />
+        <result property="sort" column="chapter_sort" />
+        <result property="createTime" column="chapter_create_time" />
+        <!-- 👑 面试考点：collection 嵌套实现一对多关联 -->
+        <collection property="sections" ofType="com.moxun.Pojo.Vo.SectionVO">
+            <id property="id" column="section_id" />
+            <result property="title" column="section_title" />
+            <result property="videoUrl" column="section_video_url" />
+            <result property="duration" column="section_duration" />
+            <result property="isFree" column="section_is_free" />
+            <result property="sort" column="section_sort" />
+            <result property="createTime" column="section_create_time" />
+        </collection>
+    </resultMap>
+
+    <!-- 获取课程目录 -->
+    <select id="getCourseCatalog" resultMap="ChapterMap">
+        SELECT
+            ch.id AS chapter_id,
+            ch.title AS chapter_title,
+            ch.sort AS chapter_sort,
+            ch.create_time AS chapter_create_time,
+            s.id AS section_id,
+            s.title AS section_title,
+            s.video_url AS section_video_url,
+            s.duration AS section_duration,
+            s.is_free AS section_is_free,
+            s.sort AS section_sort,
+            s.create_time AS section_create_time
+        FROM chapters ch
+        LEFT JOIN sections s ON ch.id = s.chapter_id
+        WHERE ch.course_id = #{courseId}
+        ORDER BY ch.sort, s.sort
+    </select>
+
+    <!-- 获取课时信息 -->
+    <select id="getSectionById" resultType="com.moxun.Pojo.Vo.SectionVO">
+        SELECT
+            id,
+            chapter_id,
+            title,
+            video_url,
+            duration,
+            is_free,
+            sort,
+            create_time
+        FROM sections
+        WHERE id = #{sectionId}
+    </select>
+
+    <!-- 获取学习进度 -->
+    <select id="getProgress" resultType="com.moxun.Pojo.Vo.LearningProgressVO">
+        SELECT
+            position,
+            finished,
+            last_learn_time
+        FROM learning_progress
+        WHERE user_id = #{userId} AND section_id = #{sectionId}
+    </select>
+
+    <!-- 插入学习进度 -->
+    <insert id="insertProgress">
+        INSERT INTO learning_progress
+            (user_id, course_id, section_id, position, finished, last_learn_time, create_time, update_time)
+        VALUES
+            (#{userId}, #{courseId}, #{sectionId}, #{position}, #{finished}, NOW(), NOW(), NOW())
+    </insert>
+
+    <!-- 更新学习进度 -->
+    <update id="updateProgress">
+        UPDATE learning_progress
+        SET
+            position = #{position},
+            finished = #{finished},
+            last_learn_time = NOW()
+        WHERE user_id = #{userId} AND section_id = #{sectionId}
+    </update>
+
+    <!-- 统计课时总数 -->
+    <select id="countSections" resultType="int">
+        SELECT COUNT(1) FROM sections WHERE chapter_id IN (
+            SELECT id FROM chapters WHERE course_id = #{courseId}
+        )
+    </select>
+
+    <!-- 统计已完成课时数 -->
+    <select id="countFinishedSections" resultType="int">
+        SELECT COUNT(1)
+        FROM learning_progress lp
+        INNER JOIN chapters ch ON lp.course_id = ch.course_id
+        INNER JOIN sections s ON ch.id = s.chapter_id
+        WHERE lp.user_id = #{userId}
+          AND lp.course_id = #{courseId}
+          AND lp.section_id = s.id
+          AND lp.finished = 1
+    </select>
+
+    <!-- 获取最后学习的课时ID -->
+    <select id="getLastSectionId" resultType="java.lang.Long">
+        SELECT section_id
+        FROM learning_progress
+        WHERE user_id = #{userId} AND course_id = #{courseId}
+        ORDER BY last_learn_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 通过课时ID获取课程ID -->
+    <select id="getCourseIdBySectionId" resultType="java.lang.Long">
+        SELECT ch.course_id
+        FROM chapters ch
+        INNER JOIN sections s ON s.chapter_id = ch.id
+        WHERE s.id = #{sectionId}
+    </select>
+
+</mapper>

@@ -16,6 +16,9 @@ public interface AdminAssignmentService {
 
     PageResult listAssignments(Long courseId, Integer page, Integer pageSize);
 
+    /**
+     * 获取作业详情
+     */
     AssignmentVO getAssignmentById(Long id);
 
     void addAssignment(AssignmentCreateDTO dto);

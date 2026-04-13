@@ -1,5 +1,6 @@
 package com.moxun.controller.student;
 
+import com.github.pagehelper.PageInfo;
 import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.CourseCommentCreateDTO;
 import com.moxun.Pojo.Vo.CourseDetailVO;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 学生端 - 课程相关接口
@@ -66,16 +68,26 @@ public class StudentCourseController {
     }
 
     /**
+     * 取消选课
+     */
+    @DeleteMapping("/{courseId}/join")
+    @UserAction(actionType = ActionType.OTHER, description = "取消选课", logResult = true)
+    public Result<String> quitCourse(@PathVariable Long courseId) {
+        studentCourseService.quitCourse(courseId);
+        return Result.success("已取消选课");
+    }
+
+    /**
      * 我的课程列表
      */
     @GetMapping("/my")
     @UserAction(actionType = ActionType.OTHER, description = "查询我的课程列表")
-    public Result<List<CourseListItemVO>> listMyCourses(
+    public Result<PageInfo<CourseListItemVO>> listMyCourses(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        List<CourseListItemVO> list = studentCourseService.listMyCourses(page, pageSize);
-        return Result.success(list);
+        PageInfo<CourseListItemVO> pageInfo = studentCourseService.listMyCourses(page, pageSize);
+        return Result.success(pageInfo);
     }
 
     /**
@@ -103,12 +115,12 @@ public class StudentCourseController {
      */
     @GetMapping("/my/favorites")
     @UserAction(actionType = ActionType.OTHER, description = "查询我的收藏列表")
-    public Result<List<CourseListItemVO>> listMyFavorites(
+    public Result<PageInfo<CourseListItemVO>> listMyFavorites(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        List<CourseListItemVO> list = studentCourseService.listMyFavorites(page, pageSize);
-        return Result.success(list);
+        PageInfo<CourseListItemVO> pageInfo = studentCourseService.listMyFavorites(page, pageSize);
+        return Result.success(pageInfo);
     }
 
     /**
@@ -137,5 +149,19 @@ public class StudentCourseController {
         dto.setCourseId(courseId);
         studentCourseService.createCourseComment(dto);
         return Result.success("评论成功");
+    }
+
+    /**
+     * 我的课程列表（带学习进度）
+     * 👑 面试考点：返回进度百分比
+     */
+    @GetMapping("/my/progress")
+    @UserAction(actionType = ActionType.OTHER, description = "查询我的课程（含学习进度）")
+    public Result<List<Map<String, Object>>> listMyCoursesWithProgress(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        List<Map<String, Object>> list = studentCourseService.listMyCoursesWithProgress(page, pageSize);
+        return Result.success(list);
     }
 }

@@ -61,7 +61,7 @@ public class AdminCourseServiceImpl implements AdminCourseService {
      */
     @Override
     public CourseDetailVO getCourseById(Long id) {
-        if (id == null) throw new RuntimeException("参数错误");
+        if (id == null) throw new BusinessException("参数错误");
         CourseDetailVO courseDetailVO = adminCourseMapper.getCourseById(id);
         return courseDetailVO;
     }
@@ -73,14 +73,14 @@ public class AdminCourseServiceImpl implements AdminCourseService {
      */
     @Override
     public void addCourse(CourseCreateDTO dto) {
-        if (Objects.isNull(dto.getTeacherId())) throw new RuntimeException("教师ID不能为空");
-        if(Objects.isNull(dto.getPrice())) throw new RuntimeException("价格不能为空");
+        if (Objects.isNull(dto.getTeacherId())) throw new BusinessException("教师ID不能为空");
+        if(Objects.isNull(dto.getPrice())) throw new BusinessException("价格不能为空");
         Course course = new Course();
         BeanUtils.copyProperties(dto, course);
         course.setCreateTime(java.time.LocalDateTime.now());
         course.setUpdateTime(java.time.LocalDateTime.now());
         int count = adminCourseMapper.addCourse(course);
-        if (count == 0) throw new RuntimeException("新增课程失败");
+        if (count == 0) throw new BusinessException("新增课程失败");
     }
 
     /**
@@ -90,12 +90,12 @@ public class AdminCourseServiceImpl implements AdminCourseService {
      */
     @Override
     public void updateCourse(CourseUpdateDTO dto) {
-        if(Objects.isNull(dto.getPrice())) throw new RuntimeException("价格不能为空");
+        if(Objects.isNull(dto.getPrice())) throw new BusinessException("价格不能为空");
         Course course = new Course();
         BeanUtils.copyProperties(dto, course);
         course.setUpdateTime(java.time.LocalDateTime.now());
         int count = adminCourseMapper.updateCourse(course);
-        if (count == 0) throw new RuntimeException("编辑课程失败");
+        if (count == 0) throw new BusinessException("编辑课程失败");
 
     }
 

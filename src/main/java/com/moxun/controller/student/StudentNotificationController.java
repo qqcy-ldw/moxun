@@ -1,5 +1,6 @@
 package com.moxun.controller.student;
 
+import com.github.pagehelper.PageInfo;
 import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Entity.Notification;
 import com.moxun.annotation.UserAction;
@@ -31,13 +32,13 @@ public class StudentNotificationController {
      */
     @GetMapping
     @UserAction(actionType = ActionType.OTHER, description = "查询通知列表")
-    public Result<List<Notification>> listMyNotifications(
+    public Result<PageInfo<Notification>> listMyNotifications(
             @RequestParam(required = false) Integer isRead,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        List<Notification> list = studentNotificationService.listMyNotifications(isRead, page, pageSize);
-        return Result.success(list);
+        PageInfo<Notification> pageInfo = studentNotificationService.listMyNotifications(isRead, page, pageSize);
+        return Result.success(pageInfo);
     }
 
     /**

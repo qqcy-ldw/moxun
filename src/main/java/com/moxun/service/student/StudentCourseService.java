@@ -1,5 +1,6 @@
 package com.moxun.service.student;
 
+import com.github.pagehelper.PageInfo;
 import com.moxun.Pojo.Dto.CourseCommentCreateDTO;
 import com.moxun.Pojo.Vo.CourseDetailVO;
 import com.moxun.Pojo.Vo.CourseListItemVO;
@@ -9,7 +10,6 @@ import java.util.List;
 
 /**
  * 学生端 - 课程服务接口
- * 请自行实现 StudentCourseServiceImpl
  */
 public interface StudentCourseService {
 
@@ -29,9 +29,14 @@ public interface StudentCourseService {
     void joinCourse(Long courseId);
 
     /**
+     * 取消选课
+     */
+    void quitCourse(Long courseId);
+
+    /**
      * 我的课程列表
      */
-    List<CourseListItemVO> listMyCourses(Integer page, Integer pageSize);
+    PageInfo<CourseListItemVO> listMyCourses(Integer page, Integer pageSize);
 
     /**
      * 收藏课程
@@ -46,7 +51,7 @@ public interface StudentCourseService {
     /**
      * 我的收藏列表
      */
-    List<CourseListItemVO> listMyFavorites(Integer page, Integer pageSize);
+    PageInfo<CourseListItemVO> listMyFavorites(Integer page, Integer pageSize);
 
     /**
      * 课程评论列表（分页）
@@ -57,4 +62,10 @@ public interface StudentCourseService {
      * 发表课程评论
      */
     void createCourseComment(CourseCommentCreateDTO dto);
+
+    /**
+     * 我的课程列表（带学习进度）
+     * 👑 面试考点：返回进度百分比 = finishedSections / totalSections * 100
+     */
+    List<java.util.Map<String, Object>> listMyCoursesWithProgress(Integer page, Integer pageSize);
 }

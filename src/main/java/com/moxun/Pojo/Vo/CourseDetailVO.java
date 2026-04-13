@@ -90,4 +90,24 @@ public class CourseDetailVO implements Serializable {
      * 章节列表（包含课时）
      */
     private List<ChapterVO> chapters;
+
+    /**
+     * 课程分类名称（冗余字段，用于展示）
+     */
+    private String categoryName;
+
+    /**
+     * 讲师名称（冗余字段，用于展示）
+     */
+    private String teacherName;
+
+    /**
+     * 是否已选课：0-否，1-是
+     */
+    private Integer isJoined;
+
+    /**
+     * 是否已收藏：0-否，1-是
+     */
+    private Integer isFavorited;
 }

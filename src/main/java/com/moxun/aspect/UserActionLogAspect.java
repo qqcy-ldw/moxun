@@ -151,9 +151,9 @@ public class UserActionLogAspect {
                     Long userIdFromArgs = extractUserIdFromArgs(joinPoint);
                     if (userIdFromArgs != null) {
                         actionLog.setUserId(userIdFromArgs);
-                        actionLogService.saveLog(actionLog);
                     }
                 }
+                actionLogService.saveLog(actionLog);
             } catch (Exception e) {
                 log.error("保存操作日志失败", e);
             }
@@ -187,7 +187,6 @@ public class UserActionLogAspect {
     private String getRequestParams(ProceedingJoinPoint joinPoint) {
         try {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-            Method method = signature.getMethod();
             Object[] args = joinPoint.getArgs();
 
             // 获取方法参数名
@@ -234,6 +233,7 @@ public class UserActionLogAspect {
         if (fieldName == null) {
             return false;
         }
+        // 将字段名转换为小写
         String lowerField = fieldName.toLowerCase();
         return lowerField.contains("password") ||
                 lowerField.contains("pwd") ||

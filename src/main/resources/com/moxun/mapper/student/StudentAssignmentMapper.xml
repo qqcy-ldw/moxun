@@ -3,14 +3,119 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.moxun.mapper.student.StudentAssignmentMapper">
 
-    <insert id="submitAssignment">
-        insert into assignment_submissions (assignment_id, user_id, content, submit_time)
-        values (#{assignmentId}, #{userId}, #{content}, #{submitTime})
-    </insert>
-    <select id="getMySubmission" resultType="com.moxun.Pojo.Vo.AssignmentSubmissionVO">
-        select
-            id, assignment_id, user_id, content, score, feedback, submit_time, graded_time
-        from assignment_submissions
-        where assignment_id = #{assignmentId} and user_id = #{userId}
+    <!-- 作业VO -->
+    <resultMap id="AssignmentVOMap" type="com.moxun.Pojo.Vo.AssignmentVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="description" column="description" />
+        <result property="courseId" column="course_id" />
+        <result property="deadline" column="deadline" />
+        <result property="totalScore" column="total_score" />
+        <result property="createTime" column="create_time" />
+        <result property="content" column="content" />
+        <result property="attachments" column="attachments" />
+    </resultMap>
+
+    <!-- 作业提交VO -->
+    <resultMap id="SubmissionMap" type="com.moxun.Pojo.Vo.AssignmentSubmissionVO">
+        <id property="id" column="id" />
+        <result property="assignmentId" column="assignment_id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="score" column="score" />
+        <result property="feedback" column="feedback" />
+        <result property="submitTime" column="submit_time" />
+        <result property="gradedTime" column="graded_time" />
+        <collection property="attachments" ofType="com.moxun.Pojo.Vo.SubmissionAttachmentVO">
+            <id property="id" column="attachment_id" />
+            <result property="fileUrl" column="file_url" />
+            <result property="fileName" column="file_name" />
+            <result property="fileSize" column="file_size" />
+        </collection>
+    </resultMap>
+
+    <!-- 查询某课程的作业列表 -->
+    <select id="listAssignmentsByCourse" resultMap="AssignmentVOMap">
+        SELECT
+            id,
+            title,
+            description,
+            course_id,
+            deadline,
+            total_score,
+            create_time,
+            content,
+            attachments
+        FROM assignments
+        WHERE course_id = #{courseId}
+        ORDER BY create_time DESC
     </select>
+
+    <!-- 查询作业详情 -->
+    <select id="getAssignmentById" resultMap="AssignmentVOMap">
+        SELECT
+            id,
+            title,
+            description,
+            course_id,
+            deadline,
+            total_score,
+            create_time,
+            content,
+            attachments
+        FROM assignments
+        WHERE id = #{assignmentId}
+    </select>
+
+    <!-- 提交作业 -->
+    <insert id="submitAssignment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO assignment_submissions (assignment_id, user_id, content, submit_time)
+        VALUES (#{assignmentId}, #{userId}, #{content}, #{submitTime})
+    </insert>
+
+    <!-- 查询我的提交记录（单个作业） -->
+    <select id="getMySubmission" resultType="com.moxun.Pojo.Vo.AssignmentSubmissionVO">
+        SELECT
+            id,
+            assignment_id,
+            user_id,
+            content,
+            score,
+            feedback,
+            submit_time,
+            graded_time
+        FROM assignment_submissions
+        WHERE assignment_id = #{assignmentId} AND user_id = #{userId}
+    </select>
+
+    <!-- 查询我的所有提交记录 -->
+    <select id="listMySubmissions" resultMap="SubmissionMap">
+        SELECT
+        ass.id,
+        ass.assignment_id,
+        ass.user_id,
+        ass.content,
+        ass.score,
+        ass.feedback,
+        ass.submit_time,
+        ass.graded_time,
+        aas.id AS attachment_id,
+        aas.file_url,
+        aas.file_name,
+        aas.file_size
+        FROM assignment_submissions ass
+        LEFT JOIN assignments a_s ON ass.assignment_id = a_s.id
+        LEFT JOIN assignment_attachments aas ON aas.assignment_id = ass.assignment_id
+        WHERE ass.user_id = #{userId}
+        <if test="courseId != null">
+            AND a_s.course_id = #{courseId}
+        </if>
+        ORDER BY ass.submit_time DESC
+    </select>
+
+    <!-- 检查作业是否存在 -->
+    <select id="countById" resultType="int">
+        SELECT COUNT(1) FROM assignments WHERE id = #{assignmentId}
+    </select>
+
 </mapper>

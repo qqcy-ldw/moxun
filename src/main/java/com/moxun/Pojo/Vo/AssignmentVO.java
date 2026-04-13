@@ -9,48 +9,58 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 作业VO（列表/基础信息）
- */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AssignmentVO implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-
-    /**
-     * 作业ID
+     * 作业VO（列表/基础信息）
      */
-    private Long id;
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class AssignmentVO implements Serializable {
+        private static final long serialVersionUID = 1L;
 
-    /**
-     * 作业标题
-     */
-    private String title;
 
-    /**
-     * 作业描述
-     */
-    private String description;
+        /**
+         * 作业ID
+         */
+        private Long id;
 
-    /**
-     * 关联课程ID
-     */
-    private Long courseId;
+        /**
+         * 作业标题
+         */
+        private String title;
 
-    /**
-     * 截止日期
-     */
-    private LocalDateTime deadline;
+        /**
+         * 作业描述
+         */
+        private String description;
 
-    /**
-     * 总分
-     */
-    private Integer totalScore;
+        /**
+         * 关联课程ID
+         */
+        private Long courseId;
 
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-}
+        /**
+         * 截止日期
+         */
+        private LocalDateTime deadline;
+
+        /**
+         * 总分
+         */
+        private Integer totalScore;
+
+        /**
+         * 创建时间
+         */
+        private LocalDateTime createTime;
+
+        /**
+         * 作业内容（富文本）
+         */
+        private String content;
+
+        /**
+         * 附件URL列表(JSON格式)
+         */
+        private String attachments;
+    }

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.student.StudentCourseMapper">
+
+<!--     ❌ 错误：JOIN 后 AVG 不需要 GROUP BY-->
+<!--    SELECT c.id, AVG(cc.rating) FROM courses c-->
+<!--    LEFT JOIN course_comments cc ON c.id = cc.course_id-->
+
+<!--     ✅ 正确：用子查询-->
+<!--    SELECT c.id,-->
+<!--    (SELECT AVG(rating) FROM course_comments WHERE course_id = c.id) AS rating-->
+<!--    FROM courses c-->
+    <!-- 课程列表项VO：含是否选课、是否收藏标识 -->
+    <resultMap id="CourseListItemMap" type="com.moxun.Pojo.Vo.CourseListItemVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="status" column="status" />
+        <result property="description" column="description" />
+        <result property="coverImage" column="cover_image" />
+        <result property="price" column="price" />
+        <result property="level" column="level" />
+        <result property="studentCount" column="student_count" />
+        <result property="rating" column="rating" />
+        <result property="createTime" column="create_time" />
+        <result property="category" column="category_name" />
+        <result property="teacher" column="teacher_name" />
+        <!-- 是否已选课：0-否，1-是 -->
+        <result property="isJoined" column="is_joined" />
+        <!-- 是否已收藏：0-否，1-是 -->
+        <result property="isFavorited" column="is_favorited" />
+    </resultMap>
+
+    <!-- 课程列表：支持分类、难度筛选，仅返回已发布课程 -->
+    <select id="listCourses" resultMap="CourseListItemMap">
+        SELECT
+            c.id,
+            c.title,
+            c.status,
+            c.description,
+            c.cover_image,
+            c.price,
+            c.level,
+            c.student_count,
+            c.create_time,
+            cat.name AS category_name,
+            u.username AS teacher_name,
+            <!-- 课程评分：子查询避免 LEFT JOIN + AVG 的 GROUP BY 问题 -->
+            (SELECT ROUND(IFNULL(AVG(rating), 0), 1) FROM course_comments WHERE course_id = c.id) AS rating,
+            <!-- 当前用户是否选课：子查询返回1表示已选 -->
+            CASE WHEN EXISTS (
+                SELECT 1 FROM user_courses uc
+                WHERE uc.course_id = c.id AND uc.user_id = #{userId} AND uc.status = 'active'
+            ) THEN 1 ELSE 0 END AS is_joined,
+            <!-- 当前用户是否收藏：子查询返回1表示已收藏 -->
+            CASE WHEN EXISTS (
+                SELECT 1 FROM course_favorites cf
+                WHERE cf.course_id = c.id AND cf.user_id = #{userId}
+            ) THEN 1 ELSE 0 END AS is_favorited
+        FROM courses c
+        LEFT JOIN course_categories cat ON c.category_id = cat.id
+        LEFT JOIN users u ON c.teacher_id = u.id
+        <where>
+            <!-- 仅返回已发布课程 -->
+            c.status = 'PUBLISHED'
+            <if test="title != null and title != ''">
+                AND c.title LIKE CONCAT('%', #{title}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND c.category_id = #{categoryId}
+            </if>
+            <if test="level != null and level != ''">
+                AND c.level = #{level}
+            </if>
+        </where>
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 我的课程列表：当前用户已选课的课程 -->
+    <select id="listMyCourses" resultMap="CourseListItemMap">
+        SELECT
+            c.id,
+            c.title,
+            c.status,
+            c.description,
+            c.cover_image,
+            c.price,
+            c.level,
+            c.student_count,
+            c.create_time,
+            cat.name AS category_name,
+            u.username AS teacher_name,
+            <!-- 课程评分：子查询避免 LEFT JOIN + AVG 的 GROUP BY 问题 -->
+            (SELECT ROUND(IFNULL(AVG(rating), 0), 1) FROM course_comments WHERE course_id = c.id) AS rating,
+            1 AS is_joined,
+            CASE WHEN EXISTS (
+                SELECT 1 FROM course_favorites cf
+                WHERE cf.course_id = c.id AND cf.user_id = #{userId}
+            ) THEN 1 ELSE 0 END AS is_favorited
+        FROM user_courses uc
+        INNER JOIN courses c ON uc.course_id = c.id
+        LEFT JOIN course_categories cat ON c.category_id = cat.id
+        LEFT JOIN users u ON c.teacher_id = u.id
+        WHERE uc.user_id = #{userId} AND uc.status = 'active'
+        ORDER BY uc.join_time DESC
+    </select>
+
+    <!-- 我的收藏列表 -->
+    <select id="listMyFavorites" resultMap="CourseListItemMap">
+        SELECT
+            c.id,
+            c.title,
+            c.status,
+            c.description,
+            c.cover_image,
+            c.price,
+            c.level,
+            c.student_count,
+            c.create_time,
+            cat.name AS category_name,
+            u.username AS teacher_name,
+            <!-- 课程评分：子查询避免 LEFT JOIN + AVG 的 GROUP BY 问题 -->
+            (SELECT ROUND(IFNULL(AVG(rating), 0), 1) FROM course_comments WHERE course_id = c.id) AS rating,
+            CASE WHEN EXISTS (
+                SELECT 1 FROM user_courses uc
+                WHERE uc.course_id = c.id AND uc.user_id = #{userId} AND uc.status = 'active'
+            ) THEN 1 ELSE 0 END AS is_joined,
+            1 AS is_favorited
+        FROM course_favorites cf
+        INNER JOIN courses c ON cf.course_id = c.id
+        LEFT JOIN course_categories cat ON c.category_id = cat.id
+        LEFT JOIN users u ON c.teacher_id = u.id
+        WHERE cf.user_id = #{userId}
+        ORDER BY cf.create_time DESC
+    </select>
+
+    <!-- 课程详情：含章节和课时（用于学习页面） -->
+    <resultMap id="CourseDetailMap" type="com.moxun.Pojo.Vo.CourseDetailVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="description" column="description" />
+        <result property="coverImage" column="cover_image" />
+        <result property="price" column="price" />
+        <result property="categoryId" column="category_id" />
+        <result property="level" column="level" />
+        <result property="duration" column="duration" />
+        <result property="teacherId" column="teacher_id" />
+        <result property="studentCount" column="student_count" />
+        <result property="status" column="status" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="categoryName" column="category_name" />
+        <result property="teacherName" column="teacher_name" />
+        <collection property="chapters" resultMap="chapterMap" />
+    </resultMap>
+
+    <!-- 章节VO：含课时列表 -->
+    <resultMap id="chapterMap" type="com.moxun.Pojo.Vo.ChapterVO">
+        <id property="id" column="chapter_id" />
+        <result property="title" column="chapter_title" />
+        <result property="sort" column="chapter_sort" />
+        <result property="createTime" column="chapter_create_time" />
+        <collection property="sections" ofType="com.moxun.Pojo.Vo.SectionVO">
+            <id property="id" column="section_id" />
+            <result property="title" column="section_title" />
+            <result property="videoUrl" column="section_video_url" />
+            <result property="duration" column="section_duration" />
+            <result property="isFree" column="section_is_free" />
+            <result property="sort" column="section_sort" />
+            <result property="createTime" column="section_create_time" />
+        </collection>
+    </resultMap>
+
+    <!-- 课程详情查询 -->
+    <select id="getCourseDetail" resultMap="CourseDetailMap">
+        SELECT
+            c.id, c.title, c.description, c.cover_image, c.price,
+            c.category_id, c.level, c.duration, c.teacher_id,
+            c.student_count, c.status, c.create_time, c.update_time,
+            cat.name AS category_name,
+            u.username AS teacher_name,
+            ch.id AS chapter_id,
+            ch.title AS chapter_title,
+            ch.sort AS chapter_sort,
+            ch.create_time AS chapter_create_time,
+            s.id AS section_id,
+            s.title AS section_title,
+            s.video_url AS section_video_url,
+            s.duration AS section_duration,
+            s.is_free AS section_is_free,
+            s.sort AS section_sort,
+            s.create_time AS section_create_time
+        FROM courses c
+        LEFT JOIN course_categories cat ON c.category_id = cat.id
+        LEFT JOIN users u ON c.teacher_id = u.id
+        LEFT JOIN chapters ch ON c.id = ch.course_id
+        LEFT JOIN sections s ON ch.id = s.chapter_id
+        WHERE c.id = #{courseId}
+        ORDER BY ch.sort, s.sort
+    </select>
+
+    <!-- 课程评论VO -->
+    <resultMap id="CommentMap" type="com.moxun.Pojo.Vo.CommentVO">
+        <id property="id" column="id" />
+        <result property="courseId" column="course_id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="rating" column="rating" />
+        <result property="createTime" column="create_time" />
+        <result property="username" column="username" />
+        <result property="avatar" column="avatar" />
+    </resultMap>
+
+    <!-- 课程评论列表 -->
+    <select id="listCourseComments" resultMap="CommentMap">
+        SELECT
+            cc.id,
+            cc.course_id,
+            cc.user_id,
+            cc.content,
+            cc.rating,
+            cc.create_time,
+            u.username,
+            u.avatar
+        FROM course_comments cc
+        LEFT JOIN users u ON cc.user_id = u.id
+        WHERE cc.course_id = #{courseId}
+        ORDER BY cc.create_time DESC
+    </select>
+
+    <!-- 选课：插入用户-课程关系 -->
+    <insert id="joinCourse">
+        INSERT INTO user_courses (user_id, course_id, join_time, status)
+        VALUES (#{userId}, #{courseId}, NOW(), 'active')
+        ON DUPLICATE KEY UPDATE status = 'active', join_time = NOW()
+    </insert>
+
+    <!-- 取消选课：更新状态为 expired -->
+    <update id="quitCourse">
+        UPDATE user_courses
+        SET status = 'expired'
+        WHERE user_id = #{userId} AND course_id = #{courseId}
+    </update>
+
+    <!-- 收藏课程 -->
+    <insert id="favoriteCourse">
+        INSERT INTO course_favorites (user_id, course_id, create_time)
+        VALUES (#{userId}, #{courseId}, NOW())
+        ON DUPLICATE KEY UPDATE create_time = NOW()
+    </insert>
+
+    <!-- 取消收藏 -->
+    <delete id="unfavoriteCourse">
+        DELETE FROM course_favorites
+        WHERE user_id = #{userId} AND course_id = #{courseId}
+    </delete>
+
+    <!-- 添加评论 -->
+    <insert id="createComment">
+        INSERT INTO course_comments (course_id, user_id, content, rating, create_time)
+        VALUES (#{courseId}, #{userId}, #{content}, #{rating}, NOW())
+    </insert>
+
+    <!-- 检查用户是否已选课 -->
+    <select id="checkJoined" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM user_courses
+        WHERE user_id = #{userId} AND course_id = #{courseId} AND status = 'active'
+    </select>
+
+    <!-- 检查用户是否已收藏 -->
+    <select id="checkFavorited" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM course_favorites
+        WHERE user_id = #{userId} AND course_id = #{courseId}
+    </select>
+
+    <!-- 我的课程列表（带学习进度） -->
+    <select id="listMyCoursesWithProgress" resultType="java.util.Map">
+        SELECT
+            c.id,
+            c.title,
+            c.cover_image,
+            c.price,
+            c.level,
+            c.student_count,
+            cat.name AS category_name,
+            u.username AS teacher_name,
+            <!-- 课程评分：子查询避免 GROUP BY 问题 -->
+            (SELECT ROUND(IFNULL(AVG(rating), 0), 1) FROM course_comments WHERE course_id = c.id) AS rating,
+            <!-- 是否已收藏 -->
+            CASE WHEN EXISTS (
+                SELECT 1 FROM course_favorites cf
+                WHERE cf.course_id = c.id AND cf.user_id = #{userId}
+            ) THEN 1 ELSE 0 END AS is_favorited,
+            <!-- 总课时数 -->
+            (SELECT COUNT(*) FROM sections s
+             INNER JOIN chapters ch ON s.chapter_id = ch.id
+             WHERE ch.course_id = c.id) AS total_sections,
+            <!-- 已完成课时数 -->
+            (SELECT COUNT(*) FROM learning_progress lp
+             INNER JOIN sections s ON lp.section_id = s.id
+             INNER JOIN chapters ch ON s.chapter_id = ch.id
+             WHERE ch.course_id = c.id AND lp.user_id = #{userId} AND lp.finished = 1) AS finished_sections
+        FROM user_courses uc
+        INNER JOIN courses c ON uc.course_id = c.id
+        LEFT JOIN course_categories cat ON c.category_id = cat.id
+        LEFT JOIN users u ON c.teacher_id = u.id
+        WHERE uc.user_id = #{userId} AND uc.status = 'active'
+        ORDER BY uc.join_time DESC
+    </select>
+
+</mapper>

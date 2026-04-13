@@ -1,5 +1,6 @@
 package com.moxun.controller.student;
 
+import com.github.pagehelper.PageInfo;
 import com.moxun.Enum.ActionType;
 import com.moxun.Pojo.Dto.AssignmentSubmitDTO;
 import com.moxun.Pojo.Vo.AssignmentSubmissionVO;
@@ -72,12 +73,12 @@ public class StudentAssignmentController {
      * 我的所有提交记录
      */
     @GetMapping("/my")
-    public Result<List<AssignmentSubmissionVO>> listMySubmissions(
+    public Result<PageInfo<AssignmentSubmissionVO>> listMySubmissions(
             @RequestParam(required = false) Long courseId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize
     ) {
-        List<AssignmentSubmissionVO> list = studentAssignmentService.listMySubmissions(courseId, page, pageSize);
-        return Result.success(list);
+        PageInfo<AssignmentSubmissionVO> pageInfo = studentAssignmentService.listMySubmissions(courseId, page, pageSize);
+        return Result.success(pageInfo);
     }
 }

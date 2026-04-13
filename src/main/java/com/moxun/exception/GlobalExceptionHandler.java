@@ -100,8 +100,9 @@ public class GlobalExceptionHandler {
      * 处理其他所有异常
      */
     @ExceptionHandler(Exception.class)
-    public Result<?> handleException(Exception e, HttpServletRequest request) {
+    public Result<?> handleException(Exception e, HttpServletRequest request, HttpServletResponse response) {
         log.error("系统异常: {}, URL: {}", e.getMessage(), request.getRequestURL(), e);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         return Result.error(ResultCode.INTERNAL_SERVER_ERROR);
     }
 

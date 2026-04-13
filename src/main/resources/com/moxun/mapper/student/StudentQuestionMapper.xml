@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxun.mapper.student.StudentQuestionMapper">
+
+    <!-- 问题列表项VO -->
+    <resultMap id="QuestionListMap" type="com.moxun.Pojo.Vo.QuestionListItemVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="userId" column="user_id" />
+        <result property="username" column="username" />
+        <result property="avatar" column="avatar" />
+        <result property="courseId" column="course_id" />
+        <result property="courseName" column="course_name" />
+        <result property="viewCount" column="view_count" />
+        <result property="answerCount" column="answer_count" />
+        <result property="createTime" column="create_time" />
+        <result property="lastAnswerTime" column="last_answer_time" />
+    </resultMap>
+
+    <!-- 问题详情VO -->
+    <resultMap id="QuestionDetailMap" type="com.moxun.Pojo.Vo.QuestionDetailVO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="userId" column="user_id" />
+        <result property="courseId" column="course_id" />
+        <result property="viewCount" column="view_count" />
+        <result property="answerCount" column="answer_count" />
+        <result property="createTime" column="create_time" />
+        <result property="lastAnswerTime" column="last_answer_time" />
+        <result property="username" column="username" />
+        <result property="userAvatar" column="user_avatar" />
+        <result property="courseName" column="course_name" />
+        <!-- 回答列表在 Service 层单独查询填充 -->
+    </resultMap>
+
+    <!-- 问题列表查询 -->
+    <select id="listQuestions" resultMap="QuestionListMap">
+        SELECT
+            q.id,
+            q.title,
+            q.content,
+            q.user_id,
+            u.username,
+            u.avatar,
+            q.course_id,
+            c.title AS course_name,
+            q.view_count,
+            q.answer_count,
+            q.create_time,
+            q.last_answer_time
+        FROM questions q
+        LEFT JOIN users u ON q.user_id = u.id
+        LEFT JOIN courses c ON q.course_id = c.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (q.title LIKE CONCAT('%', #{keyword}, '%')
+                     OR q.content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="courseId != null">
+                AND q.course_id = #{courseId}
+            </if>
+        </where>
+        ORDER BY q.create_time DESC
+    </select>
+
+    <!-- 问题详情查询 -->
+    <select id="getQuestionDetail" resultMap="QuestionDetailMap">
+        SELECT
+            q.id,
+            q.title,
+            q.content,
+            q.user_id,
+            q.course_id,
+            q.view_count,
+            q.answer_count,
+            q.create_time,
+            q.last_answer_time,
+            u.username,
+            u.avatar AS user_avatar,
+            c.title AS course_name
+        FROM questions q
+        LEFT JOIN users u ON q.user_id = u.id
+        LEFT JOIN courses c ON q.course_id = c.id
+        WHERE q.id = #{questionId}
+    </select>
+
+    <!-- 回答VO -->
+    <resultMap id="AnswerMap" type="com.moxun.Pojo.Vo.AnswerVO">
+        <id property="id" column="id" />
+        <result property="questionId" column="question_id" />
+        <result property="userId" column="user_id" />
+        <result property="username" column="username" />
+        <result property="avatar" column="avatar" />
+        <result property="content" column="content" />
+        <result property="isAccepted" column="is_accepted" />
+        <result property="likeCount" column="like_count" />
+        <result property="createTime" column="create_time" />
+        <!-- 当前用户是否已点赞 -->
+        <result property="isLiked" column="is_liked" />
+    </resultMap>
+
+    <!-- 回答列表查询 -->
+    <select id="listAnswers" resultMap="AnswerMap">
+        SELECT
+            a.id,
+            a.question_id,
+            a.user_id,
+            u.username,
+            u.avatar,
+            a.content,
+            a.is_accepted,
+            a.like_count,
+            a.create_time,
+            CASE WHEN al.id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM answers a
+        LEFT JOIN users u ON a.user_id = u.id
+        LEFT JOIN answer_likes al ON a.id = al.answer_id AND al.user_id = #{userId}
+        WHERE a.question_id = #{questionId}
+        ORDER BY a.is_accepted DESC, a.like_count DESC, a.create_time ASC
+    </select>
+
+    <!-- 创建问题 -->
+    <insert id="createQuestion">
+        INSERT INTO questions (title, content, user_id, course_id, view_count, answer_count, create_time)
+        VALUES (#{title}, #{content}, #{userId}, #{courseId}, 0, 0, NOW())
+    </insert>
+
+    <!-- 创建回答 -->
+    <insert id="createAnswer">
+        INSERT INTO answers (question_id, user_id, content, is_accepted, like_count, create_time)
+        VALUES (#{questionId}, #{userId}, #{content}, 0, 0, NOW())
+    </insert>
+
+    <!-- 更新问题回答数 -->
+    <update id="incrementAnswerCount">
+        UPDATE questions
+        SET answer_count = answer_count + 1,
+            last_answer_time = NOW()
+        WHERE id = #{questionId}
+    </update>
+
+    <!-- 点赞回答：INSERT IGNORE 保证幂等 -->
+    <insert id="likeAnswer">
+        INSERT IGNORE INTO answer_likes (answer_id, user_id, create_time)
+        VALUES (#{answerId}, #{userId}, NOW())
+    </insert>
+
+    <!-- 取消点赞 -->
+    <delete id="unlikeAnswer">
+        DELETE FROM answer_likes
+        WHERE answer_id = #{answerId} AND user_id = #{userId}
+    </delete>
+
+    <!-- 更新回答点赞数 -->
+    <update id="updateLikeCount">
+        UPDATE answers
+        SET like_count = like_count + #{delta}
+        WHERE id = #{answerId}
+    </update>
+
+    <!-- 检查是否已点赞 -->
+    <select id="checkLiked" resultType="int">
+        SELECT COUNT(1) FROM answer_likes
+        WHERE answer_id = #{answerId} AND user_id = #{userId}
+    </select>
+
+    <!-- 检查问题是否存在 -->
+    <select id="countQuestion" resultType="int">
+        SELECT COUNT(1) FROM questions WHERE id = #{questionId}
+    </select>
+
+    <!-- 检查回答是否存在 -->
+    <select id="countAnswer" resultType="int">
+        SELECT COUNT(1) FROM answers WHERE id = #{answerId}
+    </select>
+
+    <!-- 更新问题浏览数 -->
+    <update id="incrementViewCount">
+        UPDATE questions
+        SET view_count = view_count + 1
+        WHERE id = #{questionId}
+    </update>
+
+</mapper>

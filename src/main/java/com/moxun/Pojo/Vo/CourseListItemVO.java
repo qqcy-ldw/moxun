@@ -79,4 +79,16 @@ public class CourseListItemVO implements Serializable {
      * 创建时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 是否已选课：0-否，1-是
+     * 👑 面试考点：用于前端展示"已选课"状态
+     */
+    private Integer isJoined;
+
+    /**
+     * 是否已收藏：0-否，1-是
+     * 👑 面试考点：用于前端展示"已收藏"状态
+     */
+    private Integer isFavorited;
 }
